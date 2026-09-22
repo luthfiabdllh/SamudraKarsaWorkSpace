@@ -1,48 +1,58 @@
 import 'server-only';
-import { jwtVerify, type JWTPayload } from 'jose';
+import { cache } from 'react';
 import { cookies } from 'next/headers';
+import { env } from '@/env';
 
-const secret = new TextEncoder().encode(
-  process.env.JWT_SECRET ?? 'dev-secret-key-change-in-production-32c'
-);
-
-export interface SessionPayload extends JWTPayload {
-  userId: string;
-  email: string;
-  role?: string;
+export interface SessionUser {
+  readonly id: string;
+  readonly email: string;
+  readonly fullName: string | null;
+  readonly roles: readonly string[];
+  readonly divisionCodes: readonly string[];
+  readonly mustChangePassword: boolean;
+  readonly mustChangePasswordExempt: readonly string[];
 }
 
 /**
- * Performs AUTHORITATIVE JWT verification — signature + expiry.
+ * Melakukan verifikasi sesi otoritatif langsung ke Backend NestJS (/api/v1/auth/session).
  *
- * Call this from Server Components and Route Handlers.
- * NEVER call from proxy.ts (use cookie existence check there instead).
+ * Menerapkan prinsip Zero-Trust Security:
+ * - Frontend Next.js tidak menandatangani atau memverifikasi kunci rahasia token sendiri.
+ * - Menggunakan token dari cookie httpOnly 'access_token'.
+ * - Hasil di-cache menggunakan React cache() per siklus rendering RSC (deduplikasi otomatis).
  *
- * Returns the decoded payload on success, or null if the token is:
- * - Missing
- * - Expired
- * - Has an invalid signature
- *
- * @example
- * ```tsx
- * // In a Server Component or layout:
- * const session = await verifySession();
- * if (!session) redirect('/login');
- * ```
+ * Mengembalikan data sesi pengguna jika valid, atau null jika tidak valid / kedaluwarsa.
  */
-export async function verifySession(): Promise<SessionPayload | null> {
+export const verifySession = cache(async (): Promise<SessionUser | null> => {
   const cookieStore = await cookies();
   const token = cookieStore.get('access_token')?.value;
 
-  if (!token) return null;
-
-  try {
-    const { payload } = await jwtVerify(token, secret, {
-      algorithms: ['HS256'],
-    });
-    return payload as SessionPayload;
-  } catch {
-    // Token is expired, tampered, or otherwise invalid
+  if (!token) {
     return null;
   }
-}
+
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 6000);
+
+    const response = await fetch(`${env.BACKEND_API_URL}/auth/session`, {
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      return null;
+    }
+
+    const data = (await response.json()) as SessionUser;
+    return data;
+  } catch {
+    return null;
+  }
+});

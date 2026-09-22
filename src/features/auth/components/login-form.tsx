@@ -1,5 +1,6 @@
 'use client';
 
+import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useRouter } from 'next/navigation';
@@ -12,18 +13,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { cn } from '@/lib/utils';
-import type { Dictionary } from '@/lib/dictionaries/en';
+import type { Dictionary } from '@/lib/dictionaries/id';
 
 interface LoginFormProps {
-  lang: string;
   dict: Dictionary['auth']['login'];
 }
 
 /**
- * Login form — uses react-hook-form + Zod v4 + TanStack Query mutation.
- * All aria-labels are present for accessibility compliance (PRD requirement).
+ * Komponen Form Masuk Samudra Karsa.
+ * Menggunakan React Hook Form + Zod v4 + TanStack Query Mutation.
+ * Sesuai PRD-FRONTEND: Keamanan token di BFF, tidak ada token tersimpan di memori browser.
  */
-export function LoginForm({ lang, dict }: LoginFormProps) {
+export function LoginForm({ dict }: LoginFormProps) {
   const router = useRouter();
   const loginMutation = useLogin();
 
@@ -44,8 +45,8 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
       const result = await loginMutation.mutateAsync(data);
 
       if (result.success) {
-        toast.success('Signed in successfully!');
-        router.push(`/${lang}/dashboard`);
+        toast.success('Berhasil masuk ke sistem!');
+        router.push('/dashboard');
         router.refresh();
       } else {
         toast.error(result.error?.message ?? dict.errors.invalidCredentials);
@@ -62,7 +63,7 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      aria-label="Login form"
+      aria-label="Formulir Masuk"
       noValidate
       className="space-y-5"
     >
@@ -133,7 +134,7 @@ export function LoginForm({ lang, dict }: LoginFormProps) {
         )}
       </div>
 
-      {/* Submit */}
+      {/* Submit Button */}
       <Button
         id="login-submit"
         type="submit"

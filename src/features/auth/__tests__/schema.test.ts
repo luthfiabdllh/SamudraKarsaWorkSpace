@@ -84,7 +84,7 @@ describe('loginSchema (Zod v4)', () => {
       const emailIssue = result.error?.issues.find((i) =>
         i.path.includes('email')
       );
-      expect(emailIssue?.message).toBe('Please enter a valid email address.');
+      expect(emailIssue?.message).toBe('Masukkan alamat email yang valid.');
     });
 
     it('returns the correct error message for short password', () => {
@@ -96,7 +96,7 @@ describe('loginSchema (Zod v4)', () => {
       const passIssue = result.error?.issues.find((i) =>
         i.path.includes('password')
       );
-      expect(passIssue?.message).toBe('Password must be at least 8 characters.');
+      expect(passIssue?.message).toBe('Kata sandi minimal 8 karakter.');
     });
   });
 });

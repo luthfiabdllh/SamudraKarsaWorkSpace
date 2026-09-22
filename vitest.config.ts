@@ -16,10 +16,11 @@ export default defineConfig({
       exclude: [
         'src/**/*.d.ts',
         'src/app/**',
-        'src/components/ui/**',
-        'src/components/layouts/**',
+        'src/components/**',
         'src/proxy.ts',
         'src/env.ts',
+        'src/features/index.ts',
+        'src/features/**/index.ts',
         'src/features/**/server-fetch.ts',
         'src/features/**/components/**',
         'src/features/**/use-mutations.ts',

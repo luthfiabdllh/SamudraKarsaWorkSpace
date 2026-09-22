@@ -72,8 +72,7 @@ apiClient.interceptors.response.use(
       } catch {
         // Refresh failed — redirect to login
         if (typeof window !== 'undefined') {
-          const lang = document.documentElement.lang ?? 'en';
-          window.location.href = `/${lang}/login`;
+          window.location.href = '/login';
         }
         return Promise.reject(error);
       }

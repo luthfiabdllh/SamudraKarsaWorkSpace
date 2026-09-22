@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
+import { Toaster } from '@/components/ui/sonner';
+import { QueryProvider } from '@/providers/query-provider';
+import { ThemeProvider } from '@/providers/theme-provider';
 import './globals.css';
 
 const geistSans = Geist({
@@ -14,32 +17,37 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Enterprise Next.js Template',
-    template: '%s | Enterprise Next.js Template',
+    default: 'Samudra Karsa',
+    template: '%s | Samudra Karsa',
   },
   description:
-    'A scalable, modular, enterprise-grade Next.js 16 template with TypeScript, TanStack Query, Zustand, and more.',
+    'Platform Manajemen Operasional & Kolaborasi Terpadu Organisasi Samudra Karsa.',
   metadataBase: new URL(
-    process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3000'
+    process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001'
   ),
 };
 
-/**
- * Root Layout — HTML shell only.
- * No business logic, providers, or auth here.
- * All that lives in [lang]/layout.tsx.
- */
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="id" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-background text-foreground min-h-screen`}
       >
-        {children}
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <QueryProvider>
+            {children}
+            <Toaster richColors position="top-right" />
+          </QueryProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

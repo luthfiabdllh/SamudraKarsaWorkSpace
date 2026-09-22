@@ -1,25 +1,25 @@
 import { type NextRequest, NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
+import { env } from '@/env';
 import { loginSchema } from '@/features/auth/types';
-
-const BACKEND_API_URL = process.env.BACKEND_API_URL ?? 'http://localhost:8000';
-const ACCESS_TOKEN_TTL = Number(process.env.ACCESS_TOKEN_TTL ?? 900);
-const REFRESH_TOKEN_TTL = Number(process.env.REFRESH_TOKEN_TTL ?? 604800);
 
 /**
  * POST /api/auth/login
  *
- * BFF Proxy Route Handler — validates request, proxies to backend,
- * then sets httpOnly cookies. The client NEVER receives the tokens directly.
+ * BFF Proxy Route Handler:
+ * 1. Menerima kredensial email & password dari antarmuka.
+ * 2. Meneruskan ke backend NestJS (/api/v1/auth/login).
+ * 3. Menyimpan accessToken ke cookie httpOnly 'access_token' (root path).
+ * 4. Menyimpan refreshToken ke cookie httpOnly 'sk_refresh' (terbatas ke /api/auth/refresh).
+ * 5. Mengembalikan data profil (tanpa token) ke browser.
  */
 export async function POST(request: NextRequest) {
-  // ── Parse & validate body ──────────────────────────────────────────────
   let body: unknown;
   try {
     body = await request.json();
   } catch {
     return NextResponse.json(
-      { success: false, error: { code: 400, message: 'Invalid JSON body' } },
+      { success: false, error: { code: 400, message: 'Format data permintaan tidak valid.' } },
       { status: 400 }
     );
   }
@@ -31,7 +31,7 @@ export async function POST(request: NextRequest) {
         success: false,
         error: {
           code: 422,
-          message: 'Validation failed',
+          message: 'Validasi gagal. Periksa kembali email dan kata sandi Anda.',
           issues: parsed.error.issues,
         },
       },
@@ -39,14 +39,17 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // ── Proxy to backend with timeout ─────────────────────────────────────
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 9000);
 
   try {
-    const backendResponse = await fetch(`${BACKEND_API_URL}/auth/login`, {
+    const backendResponse = await fetch(`${env.BACKEND_API_URL}/auth/login`, {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      headers: {
+        'Content-Type': 'application/json',
+        'User-Agent': request.headers.get('user-agent') ?? 'SamudraKarsa-BFF',
+        'X-Forwarded-For': request.headers.get('x-forwarded-for') ?? '127.0.0.1',
+      },
       body: JSON.stringify(parsed.data),
       signal: controller.signal,
     });
@@ -54,60 +57,57 @@ export async function POST(request: NextRequest) {
     clearTimeout(timeoutId);
 
     if (!backendResponse.ok) {
-      const status = backendResponse.status;
-      if (status === 401) {
-        return NextResponse.json(
-          { success: false, error: { code: 401, message: 'Invalid credentials' } },
-          { status: 401 }
-        );
-      }
+      const errorJson = await backendResponse.json().catch(() => null);
+      const message =
+        errorJson?.title ||
+        errorJson?.message ||
+        'Kredensial tidak sah, atau akun ini tidak aktif. Hubungi pemilik organisasi.';
+
       return NextResponse.json(
-        { success: false, error: { code: 502, message: 'Upstream service error' } },
-        { status: 502 }
+        { success: false, error: { code: backendResponse.status, message } },
+        { status: backendResponse.status }
       );
     }
 
     const data = await backendResponse.json();
-
-    // ── Set httpOnly cookies — tokens NEVER returned to client JS ─────
     const cookieStore = await cookies();
 
+    // Simpan access token di cookie httpOnly
     cookieStore.set('access_token', data.accessToken, {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: ACCESS_TOKEN_TTL,
+      maxAge: data.expiresIn ?? 900,
     });
 
+    // Simpan refresh token di cookie httpOnly terbatas ke endpoint refresh
     if (data.refreshToken) {
-      cookieStore.set('refresh_token', data.refreshToken, {
+      cookieStore.set('sk_refresh', data.refreshToken, {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        // Restrict refresh token to ONLY the refresh endpoint
         path: '/api/auth/refresh',
-        maxAge: REFRESH_TOKEN_TTL,
+        maxAge: 7 * 24 * 60 * 60, // 7 hari
       });
     }
 
-    // Return user data without tokens
     return NextResponse.json({
       success: true,
-      data: { user: data.user },
+      data: { user: data.actor },
     });
   } catch (error) {
     clearTimeout(timeoutId);
 
     if (error instanceof Error && error.name === 'AbortError') {
       return NextResponse.json(
-        { success: false, error: { code: 504, message: 'Backend request timed out' } },
+        { success: false, error: { code: 504, message: 'Waktu permintaan ke layanan backend habis.' } },
         { status: 504 }
       );
     }
 
     return NextResponse.json(
-      { success: false, error: { code: 500, message: 'Internal server error' } },
+      { success: false, error: { code: 500, message: 'Terjadi kendala internal pada server.' } },
       { status: 500 }
     );
   }

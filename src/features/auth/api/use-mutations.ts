@@ -4,13 +4,13 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { apiClient } from '@/lib/api-client';
 import { authKeys } from './query-keys';
 import { toast } from 'sonner';
-import type { LoginDTO, User, AuthResponse } from '../types';
+import type { LoginDTO, ChangePasswordDTO, User, AuthResponse } from '../types';
 
 // ─── Login ────────────────────────────────────────────────────────────────
 
 /**
- * Login mutation — calls the BFF Route Handler which sets the httpOnly cookie.
- * On success, populates the currentUser cache.
+ * Login mutation — memanggil BFF Route Handler yang memasang cookie httpOnly.
+ * Mengisi cache currentUser secara instan pada saat berhasil.
  */
 export const useLogin = () => {
   const queryClient = useQueryClient();
@@ -22,12 +22,8 @@ export const useLogin = () => {
     },
     onSuccess: (response) => {
       if (response.success && response.data?.user) {
-        // Populate the cache immediately — no extra round trip needed
         queryClient.setQueryData<User>(authKeys.currentUser(), response.data.user);
       }
-    },
-    onError: () => {
-      // Error display is handled by the form component via mutation state
     },
   });
 };
@@ -35,8 +31,7 @@ export const useLogin = () => {
 // ─── Logout ────────────────────────────────────────────────────────────────
 
 /**
- * Logout mutation — calls the BFF Route Handler which clears httpOnly cookies.
- * On success, invalidates all auth-related cache entries.
+ * Logout mutation — memanggil BFF Route Handler yang mencabut sesi & membersihkan cookie httpOnly.
  */
 export const useLogout = () => {
   const queryClient = useQueryClient();
@@ -46,16 +41,25 @@ export const useLogout = () => {
       await apiClient.post('/auth/logout');
     },
     onSuccess: () => {
-      // Clear all auth-related queries from cache
       queryClient.removeQueries({ queryKey: authKeys.all });
-      toast.success('You have been signed out.');
-
-      // Redirect to login
-      const lang = document.documentElement.lang ?? 'en';
-      window.location.href = `/${lang}/login`;
+      toast.success('Anda telah berhasil keluar dari sistem.');
+      window.location.href = '/login';
     },
     onError: () => {
-      toast.error('Failed to sign out. Please try again.');
+      toast.error('Gagal keluar. Silakan coba lagi.');
+    },
+  });
+};
+
+// ─── Change Password ───────────────────────────────────────────────────────
+
+/**
+ * Change Password mutation — memanggil BFF Route Handler saat akun harus ganti password.
+ */
+export const useChangePassword = () => {
+  return useMutation({
+    mutationFn: async (payload: ChangePasswordDTO): Promise<void> => {
+      await apiClient.post('/auth/change-password', payload);
     },
   });
 };

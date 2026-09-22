@@ -1,27 +1,22 @@
-import type { Dictionary } from './dictionaries/en';
+import { id, type Dictionary } from './dictionaries/id';
 
-export type Locale = 'en' | 'id';
+export type { Dictionary };
 
-export const defaultLocale: Locale = 'en';
-export const locales: Locale[] = ['en', 'id'];
+export type Locale = 'id';
+export const defaultLocale: Locale = 'id';
+export const locales: Locale[] = ['id'];
 
 /**
- * Dynamically imports the dictionary for the given locale.
- * Called from Server Components — safe to use `import()` here.
+ * Mengambil kamus bahasa aplikasi (Bahasa Indonesia).
+ * Sesuai Keputusan 15 & 32: Bahasa tunggal Indonesia di antarmuka.
  */
-export async function getDictionary(locale: Locale): Promise<Dictionary> {
-  const dictionaries = {
-    en: () => import('./dictionaries/en').then((m) => m.en),
-    id: () => import('./dictionaries/id').then((m) => m.id),
-  } satisfies Record<Locale, () => Promise<Dictionary>>;
-
-  const loader = dictionaries[locale] ?? dictionaries[defaultLocale];
-  return loader();
+export async function getDictionary(): Promise<Dictionary> {
+  return id;
 }
 
 /**
- * Validates that a given string is a supported locale.
+ * Validasi lokal bahasa (selalu 'id').
  */
 export function isValidLocale(locale: string): locale is Locale {
-  return (locales as string[]).includes(locale);
+  return locale === 'id';
 }

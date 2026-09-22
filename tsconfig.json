@@ -26,6 +26,11 @@
         "./src/*"
       ]
     },
+    "types": [
+      "node",
+      "react",
+      "react-dom"
+    ],
     "target": "ES2017"
   },
   "include": [
