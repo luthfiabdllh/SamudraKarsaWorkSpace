@@ -28,10 +28,10 @@ describe('Feature Query Keys Scaffolds', () => {
   it('generates consistent query keys for requests', () => {
     expect(requestKeys.all).toEqual(['requests']);
     expect(requestKeys.lists()).toEqual(['requests', 'list']);
-    expect(requestKeys.list({ category: 'dana' })).toEqual([
+    expect(requestKeys.list({ type: 'budget_plan' })).toEqual([
       'requests',
       'list',
-      { category: 'dana' },
+      { type: 'budget_plan' },
     ]);
     expect(requestKeys.detail('req-1')).toEqual(['requests', 'detail', 'req-1']);
   });

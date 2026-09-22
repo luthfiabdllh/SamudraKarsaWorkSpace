@@ -1,47 +1,106 @@
 import { z } from 'zod';
 
+/**
+ * 9 Status Resmi FSM Permintaan (sesuai backend request_status)
+ */
 export const REQUEST_STATUSES = [
   'draft',
   'submitted',
-  'in_review',
-  'approved',
+  'accepted',
+  'in_progress',
+  'need_review',
+  'need_clarification',
+  'on_hold',
+  'done',
   'rejected',
-  'completed',
-  'cancelled',
 ] as const;
 
 export type RequestStatus = (typeof REQUEST_STATUSES)[number];
 
-export const REQUEST_CATEGORIES = [
-  'dana',
-  'logistik',
-  'surat',
-  'kemitraan',
-  'umum',
+/**
+ * 4 Tingkat Prioritas Permintaan
+ */
+export const REQUEST_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const;
+export type RequestPriority = (typeof REQUEST_PRIORITIES)[number];
+
+/**
+ * 14 Jenis Permintaan Lintas Divisi
+ */
+export const REQUEST_TYPES = [
+  'correspondence',
+  'budget_plan',
+  'design',
+  'video_editing',
+  'publication',
+  'documentation',
+  'goods_procurement',
+  'goods_loan',
+  'equipment_loan',
+  'vehicle_loan',
+  'operational_assistance',
+  'event_permit',
+  'speaker_request',
+  'other',
 ] as const;
 
-export type RequestCategory = (typeof REQUEST_CATEGORIES)[number];
+export type RequestType = (typeof REQUEST_TYPES)[number];
 
-export const requestSchema = z.object({
+/**
+ * Skema data item permintaan dalam daftar / tabel
+ */
+export const requestItemSchema = z.object({
   id: z.string().uuid(),
-  ticketNumber: z.string(),
+  requestNumber: z.string(),
   title: z.string().min(1),
-  category: z.enum(REQUEST_CATEGORIES),
+  type: z.enum(REQUEST_TYPES),
   status: z.enum(REQUEST_STATUSES),
-  divisionCode: z.string(),
+  priority: z.enum(REQUEST_PRIORITIES),
+  targetDivisionId: z.string().uuid(),
+  targetDivisionName: z.string().nullable().optional(),
   requesterId: z.string().uuid(),
-  amount: z.number().nullable().optional(),
-  notes: z.string().nullable().optional(),
+  requesterName: z.string().nullable().optional(),
+  assignedPicId: z.string().uuid().nullable().optional(),
+  assignedPicName: z.string().nullable().optional(),
+  dueDate: z.string().nullable().optional(),
+  syncConflictAt: z.string().nullable().optional(),
+  completedAt: z.string().nullable().optional(),
+  archivedAt: z.string().nullable().optional(),
   version: z.number().int().nonnegative(),
-  createdAt: z.string().datetime(),
-  updatedAt: z.string().datetime().nullable().optional(),
+  createdAt: z.string(),
+  updatedAt: z.string().nullable().optional(),
 });
 
-export type RequestItem = z.infer<typeof requestSchema>;
+export type RequestItem = z.infer<typeof requestItemSchema>;
 
+/**
+ * Skema data detail lengkap yang dikembalikan oleh GET /api/v1/requests/:id
+ */
+export interface RequestDetail extends RequestItem {
+  description: string | null;
+  requesterDivisionId?: string | null;
+  linkedWorkItemId: string | null;
+  extraFields: Record<string, unknown>;
+  clarificationNote: string | null;
+  resultSummary: string | null;
+  holdReason: string | null;
+  periodId: string;
+  availableTransitions: RequestStatus[];
+  transitionRequirements?: Record<string, string[]>;
+}
+
+/**
+ * Parameter filter daftar permintaan
+ */
 export interface RequestFilterParams {
-  category?: RequestCategory;
+  targetDivisionId?: string;
+  requesterId?: string;
+  assignedPicId?: string;
+  priority?: RequestPriority;
   status?: RequestStatus;
-  divisionCode?: string;
-  search?: string;
+  type?: RequestType;
+  withoutPic?: boolean;
+  hasSyncConflict?: boolean;
+  q?: string;
+  limit?: number;
+  offset?: number;
 }
