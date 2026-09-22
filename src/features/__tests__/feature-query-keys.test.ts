@@ -7,6 +7,10 @@ import { operationsKeys } from '@/features/operations/api/query-keys';
 import { partnerKeys } from '@/features/partners/api/query-keys';
 import { collaborationKeys } from '@/features/collaboration/api/query-keys';
 import { adminKeys } from '@/features/admin/api/query-keys';
+import { inventoryKeys } from '@/features/inventory/api/query-keys';
+import { meetingKeys } from '@/features/meetings/api/query-keys';
+import { calendarKeys } from '@/features/calendar/api/query-keys';
+import { teamKeys } from '@/features/team/api/query-keys';
 
 describe('Feature Query Keys Scaffolds', () => {
   it('generates consistent query keys for work-center', () => {
@@ -89,4 +93,87 @@ describe('Feature Query Keys Scaffolds', () => {
     expect(adminKeys.users()).toEqual(['admin', 'users']);
     expect(adminKeys.systemSettings()).toEqual(['admin', 'settings']);
   });
+
+  it('generates consistent query keys for inventory and logistics', () => {
+    expect(inventoryKeys.all).toEqual(['inventory']);
+    expect(inventoryKeys.items()).toEqual(['inventory', 'items']);
+    expect(inventoryKeys.itemList({ category: 'medis' })).toEqual([
+      'inventory',
+      'items',
+      { category: 'medis' },
+    ]);
+    expect(inventoryKeys.itemDetails()).toEqual(['inventory', 'item-detail']);
+    expect(inventoryKeys.itemDetail('inv-1')).toEqual([
+      'inventory',
+      'item-detail',
+      'inv-1',
+    ]);
+    expect(inventoryKeys.shipments()).toEqual(['logistics', 'shipments']);
+    expect(inventoryKeys.shipmentList({ status: 'shipped' })).toEqual([
+      'logistics',
+      'shipments',
+      { status: 'shipped' },
+    ]);
+    expect(inventoryKeys.shipmentDetail('ship-1')).toEqual([
+      'logistics',
+      'shipments',
+      'ship-1',
+    ]);
+    expect(inventoryKeys.trips()).toEqual(['logistics', 'trips']);
+    expect(inventoryKeys.tripList({ status: 'planned' })).toEqual([
+      'logistics',
+      'trips',
+      { status: 'planned' },
+    ]);
+    expect(inventoryKeys.tripDetail('trip-1')).toEqual([
+      'logistics',
+      'trips',
+      'trip-1',
+    ]);
+  });
+
+  it('generates consistent query keys for meetings and decisions', () => {
+    expect(meetingKeys.all).toEqual(['meetings']);
+    expect(meetingKeys.lists()).toEqual(['meetings', 'list']);
+    expect(meetingKeys.list('p-1')).toEqual(['meetings', 'list', { periodId: 'p-1' }]);
+    expect(meetingKeys.details()).toEqual(['meetings', 'detail']);
+    expect(meetingKeys.detail('meet-1')).toEqual(['meetings', 'detail', 'meet-1']);
+    expect(meetingKeys.decisions('meet-1')).toEqual([
+      'meetings',
+      'detail',
+      'meet-1',
+      'decisions',
+    ]);
+  });
+
+  it('generates consistent query keys for calendar', () => {
+    expect(calendarKeys.all).toEqual(['calendar']);
+    expect(calendarKeys.events()).toEqual(['calendar', 'events']);
+    expect(calendarKeys.eventList('div-1')).toEqual([
+      'calendar',
+      'events',
+      { divisionId: 'div-1' },
+    ]);
+    expect(calendarKeys.eventDetails()).toEqual(['calendar', 'event-detail']);
+    expect(calendarKeys.eventDetail('evt-1')).toEqual([
+      'calendar',
+      'event-detail',
+      'evt-1',
+    ]);
+  });
+
+  it('generates consistent query keys for team announcements and feedback', () => {
+    expect(teamKeys.all).toEqual(['team']);
+    expect(teamKeys.announcements('div-1')).toEqual([
+      'team',
+      'announcements',
+      { divisionId: 'div-1' },
+    ]);
+    expect(teamKeys.feedback('p-1')).toEqual([
+      'team',
+      'feedback',
+      { periodId: 'p-1' },
+    ]);
+  });
 });
+

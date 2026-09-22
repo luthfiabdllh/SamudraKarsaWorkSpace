@@ -8,6 +8,7 @@ import { Badge } from '@/components/ui/badge';
 import { useUIStore } from '@/store/ui.store';
 import { useLogout } from '@/features/auth/api/use-mutations';
 import { ThemeToggle } from '@/components/theme-toggle';
+import { NotificationDropdown } from '@/features/notifications';
 import type { SessionUser } from '@/lib/verify-session';
 
 interface DashboardHeaderProps {
@@ -73,6 +74,9 @@ export function DashboardHeader({
       <div className="flex items-center gap-3">
         {/* Theme mode toggle */}
         <ThemeToggle />
+
+        {/* Polling notification dropdown */}
+        <NotificationDropdown />
 
         <div className="h-4 w-px bg-border/80 mx-1 hidden sm:block" />
 
