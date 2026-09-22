@@ -30,8 +30,8 @@ async function refreshAccessToken(): Promise<void> {
  */
 export const apiClient = axios.create({
   baseURL: typeof window !== 'undefined'
-    ? `${window.location.origin}/api`
-    : process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api',
+    ? `${window.location.origin}/api/v1`
+    : process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:3000/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },

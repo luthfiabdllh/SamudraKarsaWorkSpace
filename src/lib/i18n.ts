@@ -10,7 +10,7 @@ export const locales: Locale[] = ['id'];
  * Mengambil kamus bahasa aplikasi (Bahasa Indonesia).
  * Sesuai Keputusan 15 & 32: Bahasa tunggal Indonesia di antarmuka.
  */
-export async function getDictionary(): Promise<Dictionary> {
+export function getDictionary(): Dictionary {
   return id;
 }
 
