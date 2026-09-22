@@ -89,7 +89,19 @@ describe('Feature Query Keys Scaffolds', () => {
 
   it('generates consistent query keys for admin', () => {
     expect(adminKeys.all).toEqual(['admin']);
+    expect(adminKeys.members()).toEqual(['admin', 'members']);
+    expect(adminKeys.recycleBin()).toEqual(['admin', 'recycle-bin']);
+    expect(adminKeys.recycleBin('work_items')).toEqual([
+      'admin',
+      'recycle-bin',
+      'work_items',
+    ]);
     expect(adminKeys.auditLogs()).toEqual(['admin', 'audit-logs']);
+    expect(adminKeys.auditLogs({ action: 'create' })).toEqual([
+      'admin',
+      'audit-logs',
+      { action: 'create' },
+    ]);
     expect(adminKeys.users()).toEqual(['admin', 'users']);
     expect(adminKeys.systemSettings()).toEqual(['admin', 'settings']);
   });
