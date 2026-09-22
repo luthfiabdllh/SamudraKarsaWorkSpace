@@ -47,7 +47,11 @@ describe('Feature Query Keys Scaffolds', () => {
   it('generates consistent query keys for letters', () => {
     expect(letterKeys.all).toEqual(['letters']);
     expect(letterKeys.lists()).toEqual(['letters', 'list']);
-    expect(letterKeys.list('outgoing')).toEqual(['letters', 'list', 'outgoing']);
+    expect(letterKeys.list({ direction: 'outbound' })).toEqual([
+      'letters',
+      'list',
+      { direction: 'outbound' },
+    ]);
     expect(letterKeys.detail('let-1')).toEqual(['letters', 'detail', 'let-1']);
   });
 
