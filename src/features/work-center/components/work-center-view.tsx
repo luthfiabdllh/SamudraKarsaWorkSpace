@@ -14,10 +14,17 @@ import { getDictionary } from '@/lib/i18n';
 
 interface WorkCenterViewProps {
   currentUserId?: string;
+  currentUser?: {
+    id: string;
+    roles?: readonly string[];
+    divisionCodes?: readonly string[];
+    divisionId?: string | null;
+  } | null;
 }
 
-export function WorkCenterView({ currentUserId }: WorkCenterViewProps) {
+export function WorkCenterView({ currentUserId, currentUser }: WorkCenterViewProps) {
   const dict = getDictionary();
+  const effectiveUserId = currentUser?.id ?? currentUserId;
   const [viewMode, setViewMode] = useState<'board' | 'table'>('board');
   const [filters, setFilters] = useState<WorkCenterFilterParams>({});
   const [selectedItem, setSelectedItem] = useState<WorkItem | null>(null);
@@ -50,6 +57,7 @@ export function WorkCenterView({ currentUserId }: WorkCenterViewProps) {
         onOpenCreateDialog={() => setCreateDialogOpen(true)}
         totalCount={items.length}
         withoutPicCount={withoutPicCount}
+        currentUser={currentUser}
       />
 
       {/* Loading state */}
@@ -99,7 +107,7 @@ export function WorkCenterView({ currentUserId }: WorkCenterViewProps) {
       {/* Slide-over Detail Drawer */}
       <WorkItemDrawer
         selectedItem={selectedItem}
-        currentUserId={currentUserId}
+        currentUserId={effectiveUserId}
         onClose={() => setSelectedItem(null)}
       />
 

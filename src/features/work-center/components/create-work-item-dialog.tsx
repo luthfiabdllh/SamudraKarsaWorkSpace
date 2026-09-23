@@ -21,10 +21,12 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useCreateWorkItem } from '../api/use-work-item-mutations';
+import { useWorkItems } from '../api/use-work-items';
 import { getDictionary } from '@/lib/i18n';
 import { WORK_ITEM_PRIORITIES, WORK_ITEM_TYPES, type WorkItemPriority, type WorkItemType } from '../types';
 import { Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import { cn } from '@/lib/utils';
 
 interface CreateWorkItemDialogProps {
   open: boolean;
@@ -34,10 +36,13 @@ interface CreateWorkItemDialogProps {
 export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialogProps) {
   const dict = getDictionary();
   const createMutation = useCreateWorkItem();
+  const { data: rawStories = [] } = useWorkItems({ type: 'story' });
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<WorkItemType>('task');
   const [priority, setPriority] = useState<WorkItemPriority>('medium');
+  const [parentId, setParentId] = useState('');
+  const [storyPoints, setStoryPoints] = useState(0);
   const [startDate, setStartDate] = useState('');
   const [dueDate, setDueDate] = useState('');
   const [description, setDescription] = useState('');
@@ -57,6 +62,8 @@ export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialo
         title: title.trim(),
         type,
         priority,
+        parentId: parentId || null,
+        storyPoints: type === 'task' ? storyPoints : 0,
         startDate: startDate || null,
         dueDate: dueDate || null,
         description: description.trim() || null,
@@ -68,6 +75,8 @@ export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialo
       setTitle('');
       setType('task');
       setPriority('medium');
+      setParentId('');
+      setStoryPoints(0);
       setStartDate('');
       setDueDate('');
       setDescription('');
@@ -79,7 +88,7 @@ export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialo
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-lg">
+      <DialogContent className="sm:max-w-lg max-h-[90vh] overflow-y-auto">
         <form onSubmit={handleSubmit} className="space-y-4">
           <DialogHeader>
             <DialogTitle className="text-lg font-bold">
@@ -144,6 +153,56 @@ export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialo
               </Select>
             </div>
           </div>
+
+          {/* Parent Story Selector (if type is task) */}
+          {type === 'task' && rawStories.length > 0 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="create-parent-story">{dict.workCenter.parentStory}</Label>
+              <Select
+                value={parentId || 'none'}
+                onValueChange={(val) => setParentId(val === 'none' ? '' : val)}
+              >
+                <SelectTrigger id="create-parent-story">
+                  <SelectValue placeholder={dict.workCenter.selectStoryPlaceholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{dict.workCenter.noParentStory}</SelectItem>
+                  {rawStories.map((story) => (
+                    <SelectItem key={story.id} value={story.id}>
+                      📖 {story.workNumber} - {story.title}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          )}
+
+          {/* Fibonacci Story Points for Task */}
+          {type === 'task' && (
+            <div className="space-y-1.5">
+              <div className="flex items-center justify-between">
+                <Label>{dict.workCenter.storyPointsLabel}</Label>
+                <span className="text-[11px] text-muted-foreground">{dict.workCenter.storyPointsHelp}</span>
+              </div>
+              <div className="grid grid-cols-6 gap-1.5">
+                {[1, 2, 3, 5, 8, 13].map((pts) => (
+                  <button
+                    key={pts}
+                    type="button"
+                    onClick={() => setStoryPoints(storyPoints === pts ? 0 : pts)}
+                    className={cn(
+                      'py-1.5 text-xs font-bold rounded-lg border transition-all',
+                      storyPoints === pts
+                        ? 'bg-amber-500 text-white border-amber-600 shadow-xs'
+                        : 'bg-muted/40 hover:bg-muted text-foreground border-border/80'
+                    )}
+                  >
+                    ⚡ {pts}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Dates Row */}
           <div className="grid grid-cols-2 gap-3">

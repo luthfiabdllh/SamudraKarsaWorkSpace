@@ -40,7 +40,7 @@ export function FsmTransitionDialog({
 
   if (!targetStatus) return null;
 
-  const isHold = targetStatus === 'on_hold';
+  const isHold = targetStatus === 'blocked';
   const isDone = targetStatus === 'done';
 
   const dialogTitle = isHold

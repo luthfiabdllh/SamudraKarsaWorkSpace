@@ -25,6 +25,8 @@ export function useCreateWorkItem() {
         priority: values.priority,
         divisionId: values.divisionId || null,
         primaryPicId: values.primaryPicId || null,
+        parentId: values.parentId || null,
+        storyPoints: values.storyPoints ?? 0,
         startDate: values.startDate || null,
         dueDate: values.dueDate || null,
         progressPercentage: values.progressPercentage ?? 0,
@@ -39,6 +41,45 @@ export function useCreateWorkItem() {
     },
     onSuccess: () => {
       void queryClient.invalidateQueries({ queryKey: workCenterKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Mutasi pembuatan Story beserta Task-task di bawahnya dalam 1 transaksi.
+ */
+export function useCreateStoryWithTasks() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (payload: {
+      title: string;
+      description?: string | null;
+      divisionId?: string | null;
+      priority?: string;
+      primaryPicId?: string | null;
+      dueDate?: string | null;
+      sourceRequestId?: string | null;
+      tasks: Array<{
+        title: string;
+        description?: string | null;
+        primaryPicId?: string | null;
+        priority?: string;
+        dueDate?: string | null;
+        storyPoints?: number;
+      }>;
+    }) => {
+      const idempotencyKey = crypto.randomUUID();
+      const response = await apiClient.post('/work-items/stories', payload, {
+        headers: {
+          'Idempotency-Key': idempotencyKey,
+        },
+      });
+      return response.data;
+    },
+    onSuccess: () => {
+      void queryClient.invalidateQueries({ queryKey: workCenterKeys.lists() });
+      void queryClient.invalidateQueries({ queryKey: ['work-items', 'by-request'] });
     },
   });
 }

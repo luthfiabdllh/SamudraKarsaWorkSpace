@@ -39,10 +39,14 @@ import {
   HelpCircle,
   PauseCircle,
   Info,
+  Sparkles,
+  Plus,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
 import type { AxiosError } from 'axios';
+import { useWorkItemsByRequest } from '@/features/work-center';
+import { DecomposeRequestDialog } from './decompose-request-dialog';
 
 interface RequestDrawerProps {
   selectedItem: RequestItem | null;
@@ -62,10 +66,14 @@ export function RequestDrawer({
 
   const transitionMutation = useTransitionRequest();
   const resolveConflictMutation = useResolveSyncConflict();
+  const { data: requestWorkItems, refetch: refetchWorkItems } = useWorkItemsByRequest(
+    selectedItem?.id ?? null
+  );
 
   const [activeTargetStatus, setActiveTargetStatus] = useState<RequestStatus | null>(null);
   const [showTransitionDialog, setShowTransitionDialog] = useState(false);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [showDecomposeDialog, setShowDecomposeDialog] = useState(false);
 
   if (!selectedItem) return null;
 
@@ -378,6 +386,81 @@ export function RequestDrawer({
               )}
             </div>
 
+            {/* Agile Decomposition: Stories & Tasks Section */}
+            <div className="space-y-3 p-3.5 rounded-xl border border-primary/20 bg-primary/5">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  <Sparkles className="h-4 w-4 text-primary" />
+                  <h4 className="font-bold text-xs uppercase tracking-wider text-primary">
+                    {dict.workCenter.decomposedStories}
+                  </h4>
+                </div>
+                {(currentStatus === 'accepted' || currentStatus === 'in_progress') && (
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    onClick={() => setShowDecomposeDialog(true)}
+                    className="h-7 text-xs gap-1 border-primary/30 text-primary hover:bg-primary/10"
+                  >
+                    <Plus className="h-3.5 w-3.5" />
+                    <span>{dict.workCenter.decomposeTitle}</span>
+                  </Button>
+                )}
+              </div>
+
+              {requestWorkItems?.stories && requestWorkItems.stories.length > 0 ? (
+                <div className="space-y-2.5">
+                  {requestWorkItems.stories.map((story) => (
+                    <div
+                      key={story.id}
+                      className="p-3 rounded-lg border border-border/80 bg-card space-y-2 text-xs shadow-xs"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <span className="font-semibold text-foreground flex items-center gap-1.5">
+                          <span>📖</span>
+                          <span className="truncate">{story.title}</span>
+                        </span>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                          <span className="font-bold text-amber-600 dark:text-amber-400">
+                            ⚡ {story.storyPoints} SP
+                          </span>
+                          <Badge variant="secondary" className="text-[10px] capitalize">
+                            {dict.statuses.workItems[story.status] ?? story.status}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Child Tasks */}
+                      {story.tasks && story.tasks.length > 0 && (
+                        <div className="pl-3 border-l-2 border-primary/20 space-y-1.5 pt-1">
+                          {story.tasks.map((task) => (
+                            <div
+                              key={task.id}
+                              className="flex items-center justify-between text-[11px] text-muted-foreground"
+                            >
+                              <span className="truncate max-w-[65%]">
+                                • {task.title}
+                              </span>
+                              <div className="flex items-center gap-1.5 shrink-0">
+                                <span>⚡ {task.storyPoints} SP</span>
+                                <Badge variant="outline" className="text-[9px] px-1 py-0 h-4">
+                                  {dict.statuses.workItems[task.status] ?? task.status}
+                                </Badge>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <p className="text-xs text-muted-foreground italic">
+                  Belum ada Story atau Task yang dipecah untuk pengajuan ini. Klik tombol &ldquo;{dict.workCenter.decomposeTitle}&rdquo; di atas untuk memecah pengajuan ini ke dalam Kanban tim pelaksana.
+                </p>
+              )}
+            </div>
+
             <Separator className="my-3" />
 
             {/* FSM Workflow Actions */}
@@ -453,6 +536,18 @@ export function RequestDrawer({
         currentStatus={currentStatus}
         isLoading={resolveConflictMutation.isPending}
         onConfirm={handleConfirmResolveConflict}
+      />
+
+      {/* Agile Story Decompose Dialog */}
+      <DecomposeRequestDialog
+        open={showDecomposeDialog}
+        onOpenChange={setShowDecomposeDialog}
+        request={selectedItem}
+        description={detail?.description}
+        onSuccess={() => {
+          void refetchWorkItems();
+          void refetch();
+        }}
       />
     </>
   );

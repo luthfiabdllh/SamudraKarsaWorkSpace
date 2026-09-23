@@ -59,9 +59,9 @@ describe('Work Center Schemas & Query Keys', () => {
       expect(result.success).toBe(true);
     });
 
-    it('should validate transition to on_hold with reason', () => {
+    it('should validate transition to blocked with reason', () => {
       const valid = {
-        to: 'on_hold',
+        to: 'blocked',
         holdReason: 'Cuaca buruk menghambat keberangkatan.',
       };
 

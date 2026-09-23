@@ -66,18 +66,37 @@ export function KanbanCard({ item, onClick }: KanbanCardProps) {
         priorityStyle.border
       )}
     >
-      {/* Top row: Work Number + Priority */}
-      <div className="flex items-center justify-between gap-2 mb-2">
+      {/* Top row: Work Number + SP + Priority */}
+      <div className="flex items-center justify-between gap-1.5 mb-2">
         <span className="font-mono text-[11px] font-semibold text-muted-foreground group-hover:text-primary transition-colors">
           {item.workNumber}
         </span>
-        <Badge
-          variant="outline"
-          className={cn('text-[10px] px-1.5 py-0 h-4 font-semibold uppercase', priorityStyle.badge)}
-        >
-          {dict.priorities[item.priority] ?? item.priority}
-        </Badge>
+        <div className="flex items-center gap-1 shrink-0">
+          {item.storyPoints > 0 && (
+            <Badge
+              variant="secondary"
+              className="text-[10px] px-1.5 py-0 h-4 font-bold bg-amber-500/15 text-amber-700 dark:text-amber-300 border border-amber-500/30 gap-0.5"
+            >
+              <span>⚡</span>
+              <span>{item.storyPoints} {dict.workCenter.storyPointsShort}</span>
+            </Badge>
+          )}
+          <Badge
+            variant="outline"
+            className={cn('text-[10px] px-1.5 py-0 h-4 font-semibold uppercase', priorityStyle.badge)}
+          >
+            {dict.priorities[item.priority] ?? item.priority}
+          </Badge>
+        </div>
       </div>
+
+      {/* Parent Story Badge if exists */}
+      {item.parentTitle && (
+        <div className="mb-1.5 inline-flex items-center gap-1 text-[10px] font-medium text-primary bg-primary/10 px-2 py-0.5 rounded-md truncate max-w-full border border-primary/20">
+          <span className="font-bold opacity-75">Story:</span>
+          <span className="truncate">{item.parentTitle}</span>
+        </div>
+      )}
 
       {/* Title */}
       <h3 className="text-sm font-semibold text-foreground line-clamp-2 leading-snug group-hover:text-primary transition-colors mb-2.5">

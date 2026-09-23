@@ -1,17 +1,16 @@
 import { z } from 'zod';
 
 /**
- * Nilai status resmi FSM Pekerjaan (sesuai backend `work_status` di PRD-BACKEND & ALUR-BACKEND-UNTUK-FE).
+ * Nilai status resmi FSM Pekerjaan (PM Software framework: backlog, todo, in_progress, in_review, blocked, done, canceled).
  */
 export const WORK_ITEM_STATUSES = [
-  'draft',
-  'submitted',
-  'approved',
+  'backlog',
+  'todo',
   'in_progress',
-  'need_review',
-  'on_hold',
+  'in_review',
+  'blocked',
   'done',
-  'rejected',
+  'canceled',
 ] as const;
 
 export type WorkItemStatus = (typeof WORK_ITEM_STATUSES)[number];
@@ -23,10 +22,11 @@ export const WORK_ITEM_PRIORITIES = ['low', 'medium', 'high', 'urgent'] as const
 export type WorkItemPriority = (typeof WORK_ITEM_PRIORITIES)[number];
 
 /**
- * 8 Tipe Pekerjaan Sesuai Enum Backend
+ * Tipe Pekerjaan Sesuai Enum Backend (termasuk Story untuk Agile decomposition)
  */
 export const WORK_ITEM_TYPES = [
   'task',
+  'story',
   'request',
   'meeting_follow_up',
   'program_need',
@@ -52,6 +52,10 @@ export const workItemSchema = z.object({
   divisionName: z.string().nullable().optional(),
   primaryPicId: z.string().uuid().nullable().optional(),
   primaryPicName: z.string().nullable().optional(),
+  parentId: z.string().uuid().nullable().optional(),
+  parentTitle: z.string().nullable().optional(),
+  storyPoints: z.number().int().nonnegative().default(0),
+  sourceRequestId: z.string().uuid().nullable().optional(),
   startDate: z.string().nullable().optional(),
   dueDate: z.string().nullable().optional(),
   progressPercentage: z.number().int().min(0).max(100).default(0),
@@ -95,11 +99,16 @@ export interface WorkItemDetail extends WorkItem {
   assistanceNeeded?: string | null;
   holdReason?: string | null;
   completionSummary?: string | null;
+  parentId?: string | null;
+  parentTitle?: string | null;
+  storyPoints: number;
+  sourceRequestId?: string | null;
   isRecurring: boolean;
   recurrenceRule?: string | null;
   availableTransitions: WorkItemStatus[];
   transitionRequirements?: Record<string, string[]>;
   assignees?: WorkItemAssignee[];
+  children?: WorkItem[];
   statusHistory?: WorkItemStatusHistory[];
 }
 
@@ -112,8 +121,11 @@ export interface WorkCenterFilterParams {
   priority?: WorkItemPriority;
   status?: WorkItemStatus;
   type?: WorkItemType;
+  parentId?: string;
+  sourceRequestId?: string;
   withoutPic?: boolean;
   q?: string;
   limit?: number;
   offset?: number;
 }
+

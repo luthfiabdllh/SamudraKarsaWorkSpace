@@ -18,8 +18,11 @@ import {
   Plus,
   AlertCircle,
   X,
+  Building2,
+  Lock,
 } from 'lucide-react';
 import { getDictionary } from '@/lib/i18n';
+import { useDivisions } from '@/features/requests/api/use-requests';
 import { WORK_ITEM_PRIORITIES, type WorkCenterFilterParams, type WorkItemPriority } from '../types';
 import { cn } from '@/lib/utils';
 
@@ -31,6 +34,12 @@ interface WorkCenterHeaderProps {
   onOpenCreateDialog: () => void;
   totalCount: number;
   withoutPicCount: number;
+  currentUser?: {
+    id: string;
+    roles?: readonly string[];
+    divisionCodes?: readonly string[];
+    divisionId?: string | null;
+  } | null;
 }
 
 export function WorkCenterHeader({
@@ -41,13 +50,27 @@ export function WorkCenterHeader({
   onOpenCreateDialog,
   totalCount,
   withoutPicCount,
+  currentUser,
 }: WorkCenterHeaderProps) {
   const dict = getDictionary();
+  const { data: divisions = [] } = useDivisions();
+
+  const isOwnerOrCoOwner =
+    currentUser?.roles?.some((r) => r === 'owner' || r === 'co_owner') ?? false;
+
+  const userDivision = divisions.find((d) => d.id === currentUser?.divisionId);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     onFiltersChange({
       ...filters,
       q: e.target.value || undefined,
+    });
+  };
+
+  const handleDivisionChange = (val: string) => {
+    onFiltersChange({
+      ...filters,
+      divisionId: val === 'all' ? undefined : val,
     });
   };
 
@@ -113,6 +136,34 @@ export function WorkCenterHeader({
               </button>
             )}
           </div>
+
+          {/* Scoped Division Selector: Owner/Co-Owner sees dropdown, Kadiv/Member sees locked division badge */}
+          {isOwnerOrCoOwner ? (
+            <div className="w-48">
+              <Select
+                value={filters.divisionId ?? 'all'}
+                onValueChange={handleDivisionChange}
+              >
+                <SelectTrigger className="h-9 text-xs">
+                  <Building2 className="h-3.5 w-3.5 mr-1 text-muted-foreground" />
+                  <SelectValue placeholder={dict.workCenter.filterDivision} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">{dict.workCenter.filterDivision}</SelectItem>
+                  {divisions.map((d) => (
+                    <SelectItem key={d.id} value={d.id}>
+                      {d.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ) : userDivision ? (
+            <div className="h-9 px-2.5 flex items-center gap-1.5 rounded-md bg-muted/60 border border-border/80 text-xs font-medium text-foreground">
+              <Lock className="h-3 w-3 text-primary/70 shrink-0" />
+              <span className="truncate max-w-44">{userDivision.name}</span>
+            </div>
+          ) : null}
 
           {/* Priority Select */}
           <div className="w-36">

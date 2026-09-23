@@ -83,8 +83,8 @@ export function WorkItemDrawer({
     : '-';
 
   const handleTransitionClick = async (target: WorkItemStatus) => {
-    // Jika butuh input (on_hold butuh alasan, done butuh ringkasan)
-    if (target === 'on_hold' || target === 'done') {
+    // Jika butuh input (blocked butuh alasan blocker, done butuh ringkasan)
+    if (target === 'blocked' || target === 'done') {
       setActiveTargetStatus(target);
       setShowFsmDialog(true);
       return;
@@ -319,6 +319,29 @@ export function WorkItemDrawer({
                     <span>{formattedDueDate}</span>
                   </span>
                 </div>
+
+                {/* Story Points */}
+                <div>
+                  <span className="text-muted-foreground block mb-1">
+                    {dict.workCenter.storyPoints}
+                  </span>
+                  <span className="font-bold text-amber-600 dark:text-amber-400 flex items-center gap-1">
+                    <span>⚡</span>
+                    <span>{detail?.storyPoints ?? selectedItem.storyPoints ?? 0} {dict.workCenter.storyPointsShort}</span>
+                  </span>
+                </div>
+
+                {/* Parent Story if present */}
+                {(detail?.parentTitle || selectedItem.parentTitle) && (
+                  <div>
+                    <span className="text-muted-foreground block mb-1">
+                      {dict.workCenter.parentStory}
+                    </span>
+                    <span className="font-semibold text-primary truncate block">
+                      📖 {detail?.parentTitle || selectedItem.parentTitle}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
 

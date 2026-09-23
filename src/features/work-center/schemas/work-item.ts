@@ -15,12 +15,52 @@ export const createWorkItemFormSchema = z.object({
   priority: z.enum(WORK_ITEM_PRIORITIES).default('medium'),
   divisionId: z.string().uuid('Divisi tidak valid.').nullish(),
   primaryPicId: z.string().uuid('PIC tidak valid.').nullish(),
+  parentId: z.string().uuid('Parent story tidak valid.').nullish().or(z.literal('')),
+  storyPoints: z.coerce.number().int().min(0, 'Story points tidak boleh negatif.').max(100).default(0),
   startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD').nullish().or(z.literal('')),
   dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD').nullish().or(z.literal('')),
   progressPercentage: z.coerce.number().int().min(0).max(100).default(0),
 });
 
 export type CreateWorkItemFormValues = z.infer<typeof createWorkItemFormSchema>;
+
+/**
+ * Skema satu sub-task di bawah Story
+ */
+export const subTaskItemFormSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, 'Judul task minimal 3 karakter.')
+    .max(200, 'Judul task maksimal 200 karakter.'),
+  description: z.string().trim().max(3000, 'Deskripsi maksimal 3000 karakter.').nullish(),
+  primaryPicId: z.string().uuid('PIC tidak valid.').nullish(),
+  priority: z.enum(WORK_ITEM_PRIORITIES).default('medium'),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD').nullish().or(z.literal('')),
+  storyPoints: z.coerce.number().int().min(0, 'Story points tidak boleh negatif.').max(100).default(0),
+});
+
+export type SubTaskItemFormValues = z.infer<typeof subTaskItemFormSchema>;
+
+/**
+ * Skema formulir pembuatan Story sekaligus kumpulan Task-nya
+ */
+export const createStoryWithTasksFormSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, 'Judul story minimal 3 karakter.')
+    .max(200, 'Judul story maksimal 200 karakter.'),
+  description: z.string().trim().max(5000, 'Deskripsi maksimal 5000 karakter.').nullish(),
+  divisionId: z.string().uuid('Divisi tidak valid.').nullish(),
+  primaryPicId: z.string().uuid('PIC tidak valid.').nullish(),
+  priority: z.enum(WORK_ITEM_PRIORITIES).default('medium'),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD').nullish().or(z.literal('')),
+  sourceRequestId: z.string().uuid('ID Request asal tidak valid.').nullish(),
+  tasks: z.array(subTaskItemFormSchema).min(1, 'Minimal sertakan 1 task dalam story.'),
+});
+
+export type CreateStoryWithTasksFormValues = z.infer<typeof createStoryWithTasksFormSchema>;
 
 /**
  * Skema transisi status FSM
@@ -46,3 +86,4 @@ export const setWorkItemPicSchema = z.object({
 });
 
 export type SetWorkItemPicValues = z.infer<typeof setWorkItemPicSchema>;
+

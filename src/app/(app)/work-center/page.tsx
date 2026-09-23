@@ -21,5 +21,5 @@ export default async function WorkCenterPage() {
     redirect('/login');
   }
 
-  return <WorkCenterView currentUserId={session.id} />;
+  return <WorkCenterView currentUser={session} />;
 }

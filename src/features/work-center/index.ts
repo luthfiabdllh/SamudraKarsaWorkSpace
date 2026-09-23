@@ -4,6 +4,7 @@ export * from './api/query-keys';
 export * from './api/use-work-items';
 export * from './api/use-work-item-detail';
 export * from './api/use-work-item-mutations';
+export * from './api/use-work-items-by-request';
 export * from './components/work-center-view';
 export * from './components/work-center-header';
 export * from './components/kanban-board';

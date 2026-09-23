@@ -9,6 +9,7 @@ export interface SessionUser {
   readonly fullName: string | null;
   readonly roles: readonly string[];
   readonly divisionCodes: readonly string[];
+  readonly divisionId?: string | null;
   readonly mustChangePassword: boolean;
   readonly mustChangePasswordExempt: readonly string[];
 }

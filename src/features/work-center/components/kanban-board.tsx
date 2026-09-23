@@ -22,30 +22,37 @@ interface ColumnDefinition {
 
 const KANBAN_COLUMNS: ColumnDefinition[] = [
   {
-    id: 'draft',
-    titleKey: 'draft',
-    statuses: ['draft'],
+    id: 'backlog',
+    titleKey: 'backlog',
+    statuses: ['backlog'],
     headerColor: 'border-slate-400/60 dark:border-slate-600/60',
     countBadgeColor: 'bg-slate-500/15 text-slate-700 dark:text-slate-300',
   },
   {
-    id: 'submitted',
-    titleKey: 'submitted',
-    statuses: ['submitted'],
-    headerColor: 'border-blue-400/60 dark:border-blue-600/60',
-    countBadgeColor: 'bg-blue-500/15 text-blue-700 dark:text-blue-300',
+    id: 'todo',
+    titleKey: 'todo',
+    statuses: ['todo'],
+    headerColor: 'border-sky-400/60 dark:border-sky-600/60',
+    countBadgeColor: 'bg-sky-500/15 text-sky-700 dark:text-sky-300',
   },
   {
     id: 'in_progress',
     titleKey: 'in_progress',
-    statuses: ['in_progress', 'approved', 'need_review'],
+    statuses: ['in_progress'],
     headerColor: 'border-amber-400/60 dark:border-amber-600/60',
     countBadgeColor: 'bg-amber-500/15 text-amber-700 dark:text-amber-300',
   },
   {
-    id: 'on_hold',
-    titleKey: 'on_hold',
-    statuses: ['on_hold'],
+    id: 'in_review',
+    titleKey: 'in_review',
+    statuses: ['in_review'],
+    headerColor: 'border-purple-400/60 dark:border-purple-600/60',
+    countBadgeColor: 'bg-purple-500/15 text-purple-700 dark:text-purple-300',
+  },
+  {
+    id: 'blocked',
+    titleKey: 'blocked',
+    statuses: ['blocked'],
     headerColor: 'border-rose-400/60 dark:border-rose-600/60',
     countBadgeColor: 'bg-rose-500/15 text-rose-700 dark:text-rose-300',
   },
@@ -61,10 +68,13 @@ const KANBAN_COLUMNS: ColumnDefinition[] = [
 export function KanbanBoard({ items, onSelectCard }: KanbanBoardProps) {
   const dict = getDictionary();
 
+  // Kanban hanya memunculkan Task operasional (Story berstatus agregat tidak muncul sebagai kartu mandiri)
+  const taskItems = items.filter((item) => item.type !== 'story');
+
   return (
     <div className="flex gap-4 overflow-x-auto pb-4 pt-1 items-start min-h-125">
       {KANBAN_COLUMNS.map((col) => {
-        const columnItems = items.filter((item) => col.statuses.includes(item.status));
+        const columnItems = taskItems.filter((item) => col.statuses.includes(item.status));
         const columnTitle = dict.workCenter.columns[col.titleKey] ?? col.id;
 
         return (
