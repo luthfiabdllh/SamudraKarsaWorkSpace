@@ -25,9 +25,9 @@ export function AdminView({ userRoles = [] }: AdminViewProps) {
   const [currentTab, setCurrentTab] = useState<AdminTab>('members');
 
   // Queries for live metrics
-  const { data: members = [] } = useAdminMembers();
-  const { data: recycleItems = [] } = useRecycleBinItems('work_items');
-  const { data: auditLogs = [] } = useAuditLogs();
+  const { data: members = [] } = useAdminMembers({ enabled: isAuthorized });
+  const { data: recycleItems = [] } = useRecycleBinItems('work_items', { enabled: isAuthorized });
+  const { data: auditLogs = [] } = useAuditLogs(undefined, { enabled: isAuthorized });
 
   const metrics = useMemo(() => {
     const active = members.filter((m) => m.status === 'active').length;

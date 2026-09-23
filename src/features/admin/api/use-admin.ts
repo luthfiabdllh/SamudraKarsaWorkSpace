@@ -18,7 +18,7 @@ interface ApiResponse<T> {
   message?: string;
 }
 
-export function useAdminMembers() {
+export function useAdminMembers(options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: adminKeys.members(),
     queryFn: async (): Promise<AdminMemberItem[]> => {
@@ -29,6 +29,7 @@ export function useAdminMembers() {
       return [];
     },
     staleTime: 30_000,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -106,7 +107,7 @@ export function useResetMemberPassword() {
   });
 }
 
-export function useRecycleBinItems(table: RecycleBinTable) {
+export function useRecycleBinItems(table: RecycleBinTable, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: adminKeys.recycleBin(table),
     queryFn: async (): Promise<RecycleBinItem[]> => {
@@ -117,6 +118,7 @@ export function useRecycleBinItems(table: RecycleBinTable) {
       return [];
     },
     staleTime: 10_000,
+    enabled: options?.enabled ?? true,
   });
 }
 
@@ -177,7 +179,7 @@ export function useHardDeleteRecycleBinItem(table: RecycleBinTable) {
   });
 }
 
-export function useAuditLogs(filters?: Record<string, unknown>) {
+export function useAuditLogs(filters?: Record<string, unknown>, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: adminKeys.auditLogs(filters),
     queryFn: async (): Promise<AuditLogItem[]> => {
@@ -190,5 +192,6 @@ export function useAuditLogs(filters?: Record<string, unknown>) {
       return [];
     },
     staleTime: 15_000,
+    enabled: options?.enabled ?? true,
   });
 }
