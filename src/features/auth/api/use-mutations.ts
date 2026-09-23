@@ -1,7 +1,7 @@
 'use client';
 
+import axios from 'axios';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { apiClient } from '@/lib/api-client';
 import { authKeys } from './query-keys';
 import { toast } from 'sonner';
 import type { LoginDTO, ChangePasswordDTO, User, AuthResponse } from '../types';
@@ -17,8 +17,18 @@ export const useLogin = () => {
 
   return useMutation({
     mutationFn: async (credentials: LoginDTO): Promise<AuthResponse> => {
-      const { data } = await apiClient.post<AuthResponse>('/auth/login', credentials);
-      return data;
+      try {
+        const { data } = await axios.post<AuthResponse>('/api/auth/login', credentials, {
+          headers: { 'Content-Type': 'application/json' },
+          withCredentials: true,
+        });
+        return data;
+      } catch (err: unknown) {
+        if (axios.isAxiosError(err) && err.response?.data) {
+          return err.response.data as AuthResponse;
+        }
+        throw err;
+      }
     },
     onSuccess: (response) => {
       if (response.success && response.data?.user) {
@@ -38,7 +48,7 @@ export const useLogout = () => {
 
   return useMutation({
     mutationFn: async (): Promise<void> => {
-      await apiClient.post('/auth/logout');
+      await axios.post('/api/auth/logout', null, { withCredentials: true });
     },
     onSuccess: () => {
       queryClient.removeQueries({ queryKey: authKeys.all });
@@ -59,7 +69,8 @@ export const useLogout = () => {
 export const useChangePassword = () => {
   return useMutation({
     mutationFn: async (payload: ChangePasswordDTO): Promise<void> => {
-      await apiClient.post('/auth/change-password', payload);
+      await axios.post('/api/auth/change-password', payload, { withCredentials: true });
     },
   });
 };
+

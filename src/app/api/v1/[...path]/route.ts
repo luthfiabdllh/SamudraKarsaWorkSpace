@@ -67,6 +67,36 @@ async function handleProxy(
 
     const data = await backendRes.arrayBuffer();
 
+    // Sinkronisasi cookie jika dipanggil lewat rute /api/v1/auth/*
+    if (targetPath === 'auth/login' && method === 'POST' && backendRes.ok) {
+      try {
+        const authData = JSON.parse(new TextDecoder().decode(data));
+        if (authData.accessToken) {
+          cookieStore.set('access_token', authData.accessToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/',
+            maxAge: authData.expiresIn ?? 900,
+          });
+        }
+        if (authData.refreshToken) {
+          cookieStore.set('sk_refresh', authData.refreshToken, {
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',
+            sameSite: 'lax',
+            path: '/api/auth/refresh',
+            maxAge: 7 * 24 * 60 * 60,
+          });
+        }
+      } catch {
+        // Abaikan kegagalan parsing
+      }
+    } else if (targetPath === 'auth/logout' && method === 'POST') {
+      cookieStore.delete('access_token');
+      cookieStore.delete('sk_refresh');
+    }
+
     return new NextResponse(data, {
       status: backendRes.status,
       statusText: backendRes.statusText,
