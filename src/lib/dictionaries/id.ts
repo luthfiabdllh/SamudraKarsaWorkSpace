@@ -1231,6 +1231,57 @@ export const id = {
     },
   },
 
+  divisions: {
+      title: 'Direktori Divisi & Struktur Organisasi',
+      subtitle: 'Struktur kepengurusan, profil divisi operasional, klaster keilmuan, dan unit penempatan posko.',
+      searchPlaceholder: 'Cari divisi, klaster, atau penanggung jawab...',
+      tabs: {
+        divisions: 'Divisi Operasional',
+        clusters: 'Klaster Keilmuan',
+        subunits: 'Subunit Wilayah Posko',
+      },
+      addDivision: 'Tambah Divisi Baru',
+      memberCount: 'anggota',
+      viewProfile: 'Lihat Profil Divisi',
+      details: {
+        title: 'Profil Lengkap Divisi',
+        code: 'Kode Divisi',
+        description: 'Tugas Pokok & Fungsi',
+        members: 'Daftar Anggota Divisi',
+        noMembers: 'Belum ada anggota yang terdaftar pada divisi ini.',
+        headOfDivision: 'Kepala Divisi (Kadiv)',
+        deputyHead: 'Wakil Kepala Divisi (Wakadiv)',
+        staff: 'Anggota / Staf',
+      },
+      clustersView: {
+        title: 'Klaster Keilmuan Organisasi',
+        description: 'Pengelompokan rumpun ilmu dan peminatan akademik anggota mahasiswa.',
+      },
+      subunitsView: {
+        title: 'Subunit Wilayah Posko Kegiatan',
+        description: 'Wilayah pos komando dan lokasi pengabdian di lapangan.',
+        village: 'Nama Desa / Posko',
+      },
+      createDialog: {
+        title: 'Tambah Divisi Operasional Baru',
+        description: 'Daftarkan divisi baru ke dalam struktur organisasi resmi.',
+        nameLabel: 'Nama Divisi',
+        namePlaceholder: 'misal: Logistik & Perlengkapan',
+        codeLabel: 'Kode Singkat (Huruf Kecil)',
+        codePlaceholder: 'misal: logistik',
+        iconLabel: 'Ikon Emoji',
+        iconPlaceholder: 'misal: 📦',
+        descriptionLabel: 'Deskripsi Tanggung Jawab',
+        descriptionPlaceholder: 'Jelaskan cakupan kerja dan fungsi utama divisi ini...',
+        submit: 'Simpan Divisi',
+        cancel: 'Batal',
+        success: 'Divisi baru berhasil didaftarkan.',
+      },
+      emptyTitle: 'Belum Ada Divisi Ditemukan',
+      emptyDescription: 'Tidak ada divisi atau klaster yang sesuai dengan kriteria pencarian.',
+    },
+
+
   errors: {
     notFound: {
       title: 'Halaman Tidak Ditemukan',

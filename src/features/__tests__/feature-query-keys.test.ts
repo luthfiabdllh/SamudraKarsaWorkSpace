@@ -11,6 +11,7 @@ import { inventoryKeys } from '@/features/inventory/api/query-keys';
 import { meetingKeys } from '@/features/meetings/api/query-keys';
 import { calendarKeys } from '@/features/calendar/api/query-keys';
 import { teamKeys } from '@/features/team/api/query-keys';
+import { divisionsKeys } from '@/features/divisions/api/query-keys';
 
 describe('Feature Query Keys Scaffolds', () => {
   it('generates consistent query keys for work-center', () => {
@@ -186,6 +187,16 @@ describe('Feature Query Keys Scaffolds', () => {
       'feedback',
       { periodId: 'p-1' },
     ]);
+  });
+
+  it('generates consistent query keys for divisions', () => {
+    expect(divisionsKeys.all).toEqual(['divisions']);
+    expect(divisionsKeys.list()).toEqual(['divisions', 'list']);
+    expect(divisionsKeys.detail('div-1')).toEqual(['divisions', 'detail', 'div-1']);
+    expect(divisionsKeys.clusters()).toEqual(['clusters', 'list']);
+    expect(divisionsKeys.subunits()).toEqual(['subunits', 'list']);
+    expect(divisionsKeys.members('div-1')).toEqual(['division-members', 'div-1']);
+    expect(divisionsKeys.members()).toEqual(['division-members', 'all']);
   });
 });
 
