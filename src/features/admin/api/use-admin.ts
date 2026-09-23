@@ -55,12 +55,19 @@ export function useCreateMember() {
   });
 }
 
-export function useUpdateMember(id: string) {
+export function useUpdateMember(id: string, defaultVersion?: number) {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: async (data: UpdateMemberInput) => {
-      const res = await apiClient.patch<ApiResponse<AdminMemberItem>>(`/profiles/${id}`, data);
+    mutationFn: async (data: UpdateMemberInput & { version?: number }) => {
+      const version = data.version ?? defaultVersion;
+      const headers: Record<string, string> = {};
+      if (version !== undefined) {
+        headers['If-Match'] = `"${version}"`;
+      }
+      const res = await apiClient.patch<ApiResponse<AdminMemberItem>>(`/profiles/${id}`, data, {
+        headers,
+      });
       return res.data;
     },
     onSuccess: () => {

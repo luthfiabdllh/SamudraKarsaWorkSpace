@@ -219,12 +219,24 @@ export function MembersTab() {
                     <tr key={m.id} className="hover:bg-muted/40 transition-colors">
                       {/* Name & Email */}
                       <td className="px-4 py-3">
-                        <div className="font-semibold text-foreground">
-                          {m.fullName}
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold text-foreground">{m.fullName}</span>
+                          {m.nickname && (
+                            <span className="text-xs text-muted-foreground font-normal">
+                              ({m.nickname})
+                            </span>
+                          )}
                         </div>
                         <div className="text-[11px] text-muted-foreground font-mono">
-                          {m.email}
+                          {m.email} {m.phone && <span>&bull; {m.phone}</span>}
                         </div>
+                        {(m.facultyMajor || m.batchYear) && (
+                          <div className="text-[10px] text-muted-foreground mt-0.5">
+                            {[m.facultyMajor, m.batchYear ? `'${m.batchYear.slice(-2)}` : null]
+                              .filter(Boolean)
+                              .join(' ')}
+                          </div>
+                        )}
                         {m.teamRole && (
                           <div className="text-[10px] text-primary/80 italic mt-0.5">
                             {m.teamRole}

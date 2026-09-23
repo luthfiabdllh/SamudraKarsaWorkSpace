@@ -36,6 +36,11 @@ export function CreateMemberDialog({
   const [fullName, setFullName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('SamudraKarsa2026!');
+  const [nickname, setNickname] = useState('');
+  const [phone, setPhone] = useState('');
+  const [facultyMajor, setFacultyMajor] = useState('');
+  const [batchYear, setBatchYear] = useState('');
+  const [photoUrl, setPhotoUrl] = useState('');
   const [selectedRole, setSelectedRole] = useState('member');
   const [divisionId, setDivisionId] = useState('');
   const [clusterId, setClusterId] = useState('');
@@ -43,12 +48,28 @@ export function CreateMemberDialog({
   const [teamRole, setTeamRole] = useState('');
   const [isKormater, setIsKormater] = useState(false);
   const [isKormasit, setIsKormasit] = useState(false);
+
+  // Additional Rich Profile Fields
+  const [emergencyContactName, setEmergencyContactName] = useState('');
+  const [emergencyContactPhone, setEmergencyContactPhone] = useState('');
+  const [instagram, setInstagram] = useState('');
+  const [linkedin, setLinkedin] = useState('');
+  const [github, setGithub] = useState('');
+  const [website, setWebsite] = useState('');
+  const [skills, setSkills] = useState('');
+  const [hobbies, setHobbies] = useState('');
+  const [availabilityNote, setAvailabilityNote] = useState('');
   const [error, setError] = useState<string | null>(null);
 
   const resetForm = () => {
     setFullName('');
     setEmail('');
     setPassword('SamudraKarsa2026!');
+    setNickname('');
+    setPhone('');
+    setFacultyMajor('');
+    setBatchYear('');
+    setPhotoUrl('');
     setSelectedRole('member');
     setDivisionId('');
     setClusterId('');
@@ -56,6 +77,15 @@ export function CreateMemberDialog({
     setTeamRole('');
     setIsKormater(false);
     setIsKormasit(false);
+    setEmergencyContactName('');
+    setEmergencyContactPhone('');
+    setInstagram('');
+    setLinkedin('');
+    setGithub('');
+    setWebsite('');
+    setSkills('');
+    setHobbies('');
+    setAvailabilityNote('');
     setError(null);
   };
 
@@ -67,7 +97,13 @@ export function CreateMemberDialog({
       fullName,
       email,
       password,
+      nickname: nickname.trim() || null,
+      phone: phone.trim() || null,
+      facultyMajor: facultyMajor.trim() || null,
+      batchYear: batchYear.trim() || null,
+      photoUrl: photoUrl.trim() || null,
       roles: [selectedRole],
+      status: 'active', // STATUS LANGSUNG AKTIF!
       divisionId: divisionId || null,
       clusterId: clusterId || null,
       subunitId: subunitId || null,
@@ -75,6 +111,17 @@ export function CreateMemberDialog({
       isKormasit,
       isKormater,
       periodId: null,
+      emergencyContactName: emergencyContactName.trim() || null,
+      emergencyContactPhone: emergencyContactPhone.trim() || null,
+      socialLinks: {
+        instagram: instagram.trim() || null,
+        linkedin: linkedin.trim() || null,
+        github: github.trim() || null,
+        website: website.trim() || null,
+      },
+      skills: skills ? skills.split(',').map((s) => s.trim()).filter(Boolean) : [],
+      hobbies: hobbies ? hobbies.split(',').map((s) => s.trim()).filter(Boolean) : [],
+      availabilityNote: availabilityNote.trim() || null,
     });
 
     if (!parseResult.success) {
@@ -125,6 +172,21 @@ export function CreateMemberDialog({
             </div>
 
             <div className="space-y-1.5">
+              <Label htmlFor="m-nickname" className="text-xs font-semibold">
+                Nama Panggilan
+              </Label>
+              <Input
+                id="m-nickname"
+                placeholder="misal: Bagas, Dwi"
+                value={nickname}
+                onChange={(e) => setNickname(e.target.value)}
+                className="h-9 text-sm"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div className="space-y-1.5">
               <Label htmlFor="m-email" className="text-xs font-semibold">
                 {dict.emailLabel} <span className="text-destructive">*</span>
               </Label>
@@ -136,6 +198,19 @@ export function CreateMemberDialog({
                 onChange={(e) => setEmail(e.target.value)}
                 className="h-9 text-sm"
                 required
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="m-phone" className="text-xs font-semibold">
+                No. Telepon / WhatsApp
+              </Label>
+              <Input
+                id="m-phone"
+                placeholder="+62 812-xxxx-xxxx"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                className="h-9 text-sm"
               />
             </div>
           </div>
@@ -173,6 +248,49 @@ export function CreateMemberDialog({
                 <option value="owner">{roleLabels.owner}</option>
               </select>
             </div>
+          </div>
+
+          {/* Akademik & Foto */}
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div className="space-y-1.5 sm:col-span-2">
+              <Label htmlFor="m-faculty-major" className="text-xs font-semibold">
+                Fakultas / Program Studi
+              </Label>
+              <Input
+                id="m-faculty-major"
+                placeholder="misal: Teknik Elektro / Ilmu Komputer"
+                value={facultyMajor}
+                onChange={(e) => setFacultyMajor(e.target.value)}
+                className="h-9 text-sm"
+              />
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="m-batch-year" className="text-xs font-semibold">
+                Angkatan (Tahun)
+              </Label>
+              <Input
+                id="m-batch-year"
+                placeholder="2023"
+                value={batchYear}
+                onChange={(e) => setBatchYear(e.target.value)}
+                className="h-9 text-sm"
+                maxLength={4}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <Label htmlFor="m-photo-url" className="text-xs font-semibold">
+              URL Foto Profil (Opsional)
+            </Label>
+            <Input
+              id="m-photo-url"
+              placeholder="https://..."
+              value={photoUrl}
+              onChange={(e) => setPhotoUrl(e.target.value)}
+              className="h-9 text-sm"
+            />
           </div>
 
           {/* Penugasan Tri-Dimensi */}
@@ -293,6 +411,132 @@ export function CreateMemberDialog({
                   </p>
                 </div>
               </label>
+            </div>
+          </div>
+
+          {/* Kontak Darurat */}
+          <div className="rounded-xl border border-border/70 p-3.5 bg-muted/20 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Kontak Darurat (Emergency Contact)
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="m-emg-name" className="text-xs font-semibold">
+                  Nama Kontak Darurat
+                </Label>
+                <Input
+                  id="m-emg-name"
+                  placeholder="misal: Orang Tua / Wali"
+                  value={emergencyContactName}
+                  onChange={(e) => setEmergencyContactName(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="m-emg-phone" className="text-xs font-semibold">
+                  No. HP Kontak Darurat
+                </Label>
+                <Input
+                  id="m-emg-phone"
+                  placeholder="+62 81x-xxxx-xxxx"
+                  value={emergencyContactPhone}
+                  onChange={(e) => setEmergencyContactPhone(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Media Sosial & Portofolio */}
+          <div className="rounded-xl border border-border/70 p-3.5 bg-muted/20 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Tautan Sosial & Portofolio
+            </h4>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label htmlFor="m-soc-ig" className="text-xs font-semibold">Instagram URL</Label>
+                <Input
+                  id="m-soc-ig"
+                  placeholder="https://instagram.com/..."
+                  value={instagram}
+                  onChange={(e) => setInstagram(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="m-soc-li" className="text-xs font-semibold">LinkedIn URL</Label>
+                <Input
+                  id="m-soc-li"
+                  placeholder="https://linkedin.com/in/..."
+                  value={linkedin}
+                  onChange={(e) => setLinkedin(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="m-soc-gh" className="text-xs font-semibold">GitHub URL</Label>
+                <Input
+                  id="m-soc-gh"
+                  placeholder="https://github.com/..."
+                  value={github}
+                  onChange={(e) => setGithub(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="m-soc-web" className="text-xs font-semibold">Website / Portofolio</Label>
+                <Input
+                  id="m-soc-web"
+                  placeholder="https://..."
+                  value={website}
+                  onChange={(e) => setWebsite(e.target.value)}
+                  className="h-9 text-xs"
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Keahlian, Hobi, & Ketersediaan */}
+          <div className="rounded-xl border border-border/70 p-3.5 bg-muted/20 space-y-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+              Keahlian, Hobi, & Ketersediaan
+            </h4>
+            <div className="space-y-1.5">
+              <Label htmlFor="m-skills" className="text-xs font-semibold">
+                Keahlian (pisahkan dengan koma)
+              </Label>
+              <Input
+                id="m-skills"
+                placeholder="Desain, React, Manajemen Acara, Fotografi"
+                value={skills}
+                onChange={(e) => setSkills(e.target.value)}
+                className="h-9 text-xs"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="m-hobbies" className="text-xs font-semibold">
+                Hobi & Minat (pisahkan dengan koma)
+              </Label>
+              <Input
+                id="m-hobbies"
+                placeholder="Membaca, Futsal, Musik"
+                value={hobbies}
+                onChange={(e) => setHobbies(e.target.value)}
+                className="h-9 text-xs"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label htmlFor="m-avail" className="text-xs font-semibold">
+                Catatan Ketersediaan Waktu
+              </Label>
+              <Input
+                id="m-avail"
+                placeholder="misal: Tersedia sore hari setelah perkuliahan"
+                value={availabilityNote}
+                onChange={(e) => setAvailabilityNote(e.target.value)}
+                className="h-9 text-xs"
+              />
             </div>
           </div>
 

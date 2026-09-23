@@ -241,6 +241,8 @@ export const id = {
     members: {
       active: 'Aktif',
       inactive: 'Nonaktif',
+      invited: 'Diundang',
+      suspended: 'Ditangguhkan',
     },
     recycleBin: {
       work_items: 'Pekerjaan (Work Items)',

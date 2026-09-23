@@ -24,8 +24,11 @@ async function handleProxy(
 
   const headers = new Headers();
 
-  // Forward access token dari httpOnly cookie ke backend
-  if (accessToken) {
+  // Forward access token dari httpOnly cookie atau incoming Authorization header
+  const authHeader = request.headers.get('authorization');
+  if (authHeader) {
+    headers.set('Authorization', authHeader);
+  } else if (accessToken) {
     headers.set('Authorization', `Bearer ${accessToken}`);
   }
 
