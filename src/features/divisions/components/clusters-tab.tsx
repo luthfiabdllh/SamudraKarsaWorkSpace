@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Atom, Compass, Sprout, HeartPulse, Share2, Users, GraduationCap } from 'lucide-react';
+import { Atom, Compass, Sprout, HeartPulse, Share2, Users, GraduationCap, Sparkles } from 'lucide-react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -84,6 +84,9 @@ export function ClustersTab({
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {filteredClusters.map((cluster) => {
           const clusterMembers = members.filter((m) => m.clusterId === cluster.id);
+          const kormater = clusterMembers.find(
+            (m) => m.isKormater || m.teamRole?.toLowerCase().includes('kormater')
+          );
 
           return (
             <Card
@@ -108,6 +111,25 @@ export function ClustersTab({
               </CardHeader>
 
               <CardContent className="space-y-3 pt-0">
+                {/* Kormater preview */}
+                <div className="rounded-lg bg-muted/40 p-2.5 border border-border/50 flex items-center gap-2.5">
+                  <Avatar className="h-8 w-8 rounded-full border border-border shrink-0">
+                    <AvatarImage src={kormater?.photoUrl ?? undefined} />
+                    <AvatarFallback className="text-[10px] font-semibold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                      {kormater?.fullName ? kormater.fullName.slice(0, 2).toUpperCase() : 'KM'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+                      <Sparkles className="h-3 w-3 text-amber-500" />
+                      {dict.clustersView.kormaterLabel}
+                    </p>
+                    <p className="text-xs font-semibold text-foreground truncate">
+                      {kormater?.fullName || kormater?.nickname || dict.clustersView.noKormater}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-2.5">
                   <span className="flex items-center gap-1.5 font-medium text-foreground">
                     <Users className="h-3.5 w-3.5 text-muted-foreground" />

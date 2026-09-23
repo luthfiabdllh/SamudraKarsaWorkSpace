@@ -19,6 +19,11 @@ export const createMemberSchema = z.object({
     .array(z.string())
     .min(1, 'Setidaknya satu peran struktural harus dipilih'),
   divisionId: z.string().uuid().optional().nullable().or(z.literal('')),
+  clusterId: z.string().uuid().optional().nullable().or(z.literal('')),
+  subunitId: z.string().uuid().optional().nullable().or(z.literal('')),
+  teamRole: z.string().trim().max(120).optional().nullable().or(z.literal('')),
+  isKormasit: z.boolean().default(false),
+  isKormater: z.boolean().default(false),
   periodId: z.string().uuid().optional().nullable().or(z.literal('')),
 });
 
@@ -36,6 +41,11 @@ export const updateMemberSchema = z.object({
     .min(1, 'Setidaknya satu peran harus dipilih')
     .optional(),
   divisionId: z.string().uuid().optional().nullable().or(z.literal('')),
+  clusterId: z.string().uuid().optional().nullable().or(z.literal('')),
+  subunitId: z.string().uuid().optional().nullable().or(z.literal('')),
+  teamRole: z.string().trim().max(120).optional().nullable().or(z.literal('')),
+  isKormasit: z.boolean().optional(),
+  isKormater: z.boolean().optional(),
   status: z.enum(['active', 'inactive']).optional(),
 });
 

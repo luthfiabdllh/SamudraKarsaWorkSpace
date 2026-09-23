@@ -68,6 +68,9 @@ export function SubunitsTab({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {filteredSubunits.map((subunit) => {
           const subunitMembers = members.filter((m) => m.subunitId === subunit.id);
+          const kormasit = subunitMembers.find(
+            (m) => m.isKormasit || m.teamRole?.toLowerCase().includes('kormasit')
+          );
 
           return (
             <Card
@@ -97,6 +100,25 @@ export function SubunitsTab({
               </CardHeader>
 
               <CardContent className="space-y-3 pt-0">
+                {/* Kormasit preview */}
+                <div className="rounded-lg bg-muted/40 p-2.5 border border-border/50 flex items-center gap-2.5">
+                  <Avatar className="h-8 w-8 rounded-full border border-border shrink-0">
+                    <AvatarImage src={kormasit?.photoUrl ?? undefined} />
+                    <AvatarFallback className="text-[10px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                      {kormasit?.fullName ? kormasit.fullName.slice(0, 2).toUpperCase() : 'KS'}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[11px] font-medium text-muted-foreground flex items-center gap-1">
+                      <MapPin className="h-3 w-3 text-emerald-500" />
+                      {dict.subunitsView.kormasitLabel}
+                    </p>
+                    <p className="text-xs font-semibold text-foreground truncate">
+                      {kormasit?.fullName || kormasit?.nickname || dict.subunitsView.noKormasit}
+                    </p>
+                  </div>
+                </div>
+
                 <div className="flex items-center justify-between text-xs text-muted-foreground border-t border-border/50 pt-2.5">
                   <span className="flex items-center gap-1.5 font-medium text-foreground">
                     <Users className="h-3.5 w-3.5 text-muted-foreground" />

@@ -27,6 +27,13 @@ export interface AdminMemberItem {
   roles: string[];
   divisionId?: string | null;
   divisionName?: string | null;
+  clusterId?: string | null;
+  clusterName?: string | null;
+  subunitId?: string | null;
+  subunitName?: string | null;
+  teamRole?: string | null;
+  isKormasit?: boolean;
+  isKormater?: boolean;
   periodId?: string | null;
   createdAt: string;
   lastLoginAt?: string | null;

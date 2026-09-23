@@ -10,6 +10,9 @@ import {
   UserCheck,
   Shield,
   Building,
+  GraduationCap,
+  MapPin,
+  Sparkles,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -17,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { id as dictionary } from '@/lib/dictionaries/id';
 import { useAdminMembers, useUpdateMember } from '../api/use-admin';
 import { useDivisions } from '@/features/requests/api/use-requests';
+import { useClustersList, useSubunitsList } from '@/features/divisions';
 import { CreateMemberDialog } from './create-member-dialog';
 import { EditMemberDialog } from './edit-member-dialog';
 import { ResetPasswordDialog } from './reset-password-dialog';
@@ -29,10 +33,18 @@ export function MembersTab() {
 
   const { data: members = [], isLoading } = useAdminMembers();
   const { data: divisions = [] } = useDivisions();
+  const { data: clusters = [] } = useClustersList();
+  const { data: subunits = [] } = useSubunitsList();
+
+  const divisionMap = useMemo(() => new Map(divisions.map((d) => [d.id, d.name])), [divisions]);
+  const clusterMap = useMemo(() => new Map(clusters.map((c) => [c.id, c.name])), [clusters]);
+  const subunitMap = useMemo(() => new Map(subunits.map((s) => [s.id, s.name])), [subunits]);
 
   const [search, setSearch] = useState('');
   const [roleFilter, setRoleFilter] = useState('');
   const [divisionFilter, setDivisionFilter] = useState('');
+  const [clusterFilter, setClusterFilter] = useState('');
+  const [subunitFilter, setSubunitFilter] = useState('');
   const [statusFilter, setStatusFilter] = useState('');
 
   // Dialog states
@@ -55,7 +67,7 @@ export function MembersTab() {
     try {
       await updateMutation.mutateAsync({ status: nextStatus });
     } catch {
-      // handled
+      // handled in mutation
     }
   };
 
@@ -68,11 +80,13 @@ export function MembersTab() {
 
       const matchRole = !roleFilter || m.roles.includes(roleFilter);
       const matchDivision = !divisionFilter || m.divisionId === divisionFilter;
+      const matchCluster = !clusterFilter || m.clusterId === clusterFilter;
+      const matchSubunit = !subunitFilter || m.subunitId === subunitFilter;
       const matchStatus = !statusFilter || m.status === statusFilter;
 
-      return matchSearch && matchRole && matchDivision && matchStatus;
+      return matchSearch && matchRole && matchDivision && matchCluster && matchSubunit && matchStatus;
     });
-  }, [members, search, roleFilter, divisionFilter, statusFilter]);
+  }, [members, search, roleFilter, divisionFilter, clusterFilter, subunitFilter, statusFilter]);
 
   return (
     <div className="space-y-4">
@@ -108,9 +122,35 @@ export function MembersTab() {
             className="h-9 rounded-md border border-input bg-background px-2.5 text-xs text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="">{dict.filterDivision}</option>
-            {divisions.map((d) => (
-              <option key={d.id} value={d.id}>
-                {d.name}
+            {divisions.map((div) => (
+              <option key={div.id} value={div.id}>
+                {div.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={clusterFilter}
+            onChange={(e) => setClusterFilter(e.target.value)}
+            className="h-9 rounded-md border border-input bg-background px-2.5 text-xs text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">{dict.filterCluster}</option>
+            {clusters.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+
+          <select
+            value={subunitFilter}
+            onChange={(e) => setSubunitFilter(e.target.value)}
+            className="h-9 rounded-md border border-input bg-background px-2.5 text-xs text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+          >
+            <option value="">{dict.filterSubunit}</option>
+            {subunits.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
               </option>
             ))}
           </select>
@@ -127,40 +167,40 @@ export function MembersTab() {
         </div>
 
         <Button
-          type="button"
-          size="sm"
+          id="btn-add-member"
           onClick={() => setIsCreateOpen(true)}
-          className="gap-1.5 shrink-0 text-xs font-semibold shadow-xs"
+          className="gap-2 shrink-0 h-9 text-xs"
         >
           <UserPlus className="h-4 w-4" />
           <span>{dict.createMember}</span>
         </Button>
       </div>
 
-      {/* Members Table */}
-      <div className="rounded-xl border border-border/70 bg-card overflow-hidden shadow-xs">
+      {/* Table Data */}
+      <div className="rounded-xl border border-border bg-card/60 overflow-hidden shadow-xs">
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs">
-            <thead className="bg-muted/60 text-muted-foreground uppercase tracking-wider font-semibold border-b border-border/70 text-[11px]">
+            <thead className="bg-muted/50 border-b border-border text-muted-foreground font-semibold">
               <tr>
                 <th className="px-4 py-3">{dict.table.name}</th>
                 <th className="px-4 py-3">{dict.table.roles}</th>
                 <th className="px-4 py-3">{dict.table.division}</th>
+                <th className="px-4 py-3">{dict.table.cluster}</th>
+                <th className="px-4 py-3">{dict.table.subunit}</th>
                 <th className="px-4 py-3">{dict.table.status}</th>
-                <th className="px-4 py-3">{dict.table.lastLogin}</th>
                 <th className="px-4 py-3 text-right">{dict.table.actions}</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/60">
               {isLoading ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-8 text-center text-muted-foreground">
+                  <td colSpan={7} className="px-4 py-8 text-center text-muted-foreground">
                     Memuat data anggota...
                   </td>
                 </tr>
               ) : filteredMembers.length === 0 ? (
                 <tr>
-                  <td colSpan={6} className="px-4 py-12 text-center">
+                  <td colSpan={7} className="px-4 py-12 text-center">
                     <p className="text-sm font-semibold text-foreground">
                       {dict.emptyTitle}
                     </p>
@@ -170,113 +210,169 @@ export function MembersTab() {
                   </td>
                 </tr>
               ) : (
-                filteredMembers.map((m) => (
-                  <tr key={m.id} className="hover:bg-muted/40 transition-colors">
-                    <td className="px-4 py-3">
-                      <div className="font-semibold text-foreground">
-                        {m.fullName}
-                      </div>
-                      <div className="text-[11px] text-muted-foreground font-mono">
-                        {m.email}
-                      </div>
-                    </td>
+                filteredMembers.map((m) => {
+                  const divName = m.divisionName || (m.divisionId ? divisionMap.get(m.divisionId) : null);
+                  const clustName = m.clusterName || (m.clusterId ? clusterMap.get(m.clusterId) : null);
+                  const subName = m.subunitName || (m.subunitId ? subunitMap.get(m.subunitId) : null);
 
-                    <td className="px-4 py-3">
-                      <div className="flex flex-wrap gap-1">
-                        {m.roles.map((r) => (
-                          <Badge
-                            key={r}
-                            variant={r === 'owner' ? 'default' : 'secondary'}
-                            className="text-[10px] font-medium py-0"
-                          >
-                            <Shield className="h-2.5 w-2.5 mr-1" />
-                            {roleLabels[r as keyof typeof roleLabels] || r}
-                          </Badge>
-                        ))}
-                      </div>
-                    </td>
-
-                    <td className="px-4 py-3 text-muted-foreground">
-                      {m.divisionName ? (
-                        <div className="flex items-center gap-1">
-                          <Building className="h-3 w-3 text-muted-foreground" />
-                          <span>{m.divisionName}</span>
+                  return (
+                    <tr key={m.id} className="hover:bg-muted/40 transition-colors">
+                      {/* Name & Email */}
+                      <td className="px-4 py-3">
+                        <div className="font-semibold text-foreground">
+                          {m.fullName}
                         </div>
-                      ) : (
-                        <span className="italic text-muted-foreground/60">-</span>
-                      )}
-                    </td>
+                        <div className="text-[11px] text-muted-foreground font-mono">
+                          {m.email}
+                        </div>
+                        {m.teamRole && (
+                          <div className="text-[10px] text-primary/80 italic mt-0.5">
+                            {m.teamRole}
+                          </div>
+                        )}
+                      </td>
 
-                    <td className="px-4 py-3">
-                      <Badge
-                        variant={m.status === 'active' ? 'default' : 'outline'}
-                        className={`text-[10px] font-semibold ${
-                          m.status === 'active'
-                            ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
-                            : 'text-muted-foreground border-border'
-                        }`}
-                      >
-                        {statusLabels[m.status]}
-                      </Badge>
-                    </td>
+                      {/* Primary Role */}
+                      <td className="px-4 py-3">
+                        <div className="flex flex-wrap gap-1">
+                          {m.roles.map((r) => (
+                            <Badge
+                              key={r}
+                              variant={r === 'owner' ? 'default' : 'secondary'}
+                              className="text-[10px] font-medium py-0"
+                            >
+                              <Shield className="h-2.5 w-2.5 mr-1" />
+                              {roleLabels[r as keyof typeof roleLabels] || r}
+                            </Badge>
+                          ))}
+                        </div>
+                      </td>
 
-                    <td className="px-4 py-3 text-muted-foreground text-[11px]">
-                      {m.lastLoginAt ? new Date(m.lastLoginAt).toLocaleDateString('id-ID') : 'Belum pernah'}
-                    </td>
+                      {/* Division */}
+                      <td className="px-4 py-3 text-muted-foreground">
+                        {divName ? (
+                          <div className="flex items-center gap-1 font-medium text-foreground">
+                            <Building className="h-3 w-3 text-muted-foreground shrink-0" />
+                            <span>{divName}</span>
+                          </div>
+                        ) : (
+                          <span className="italic text-muted-foreground/60">BPH / Global</span>
+                        )}
+                      </td>
 
-                    <td className="px-4 py-3 text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                          title={dict.actions.edit}
-                          onClick={() => setSelectedMemberForEdit(m)}
-                        >
-                          <Edit2 className="h-3.5 w-3.5" />
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className="h-7 w-7 text-primary hover:text-primary hover:bg-primary/10"
-                          title={dict.actions.resetPassword}
-                          onClick={() => setSelectedMemberForReset(m)}
-                        >
-                          <KeyRound className="h-3.5 w-3.5" />
-                        </Button>
-
-                        <Button
-                          type="button"
-                          variant="ghost"
-                          size="icon"
-                          className={`h-7 w-7 ${
-                            m.status === 'active'
-                              ? 'text-destructive/80 hover:text-destructive hover:bg-destructive/10'
-                              : 'text-emerald-600 hover:text-emerald-700 hover:bg-emerald-500/10'
-                          }`}
-                          title={m.status === 'active' ? dict.actions.deactivate : dict.actions.activate}
-                          onClick={() => handleToggleStatus(m)}
-                        >
-                          {m.status === 'active' ? (
-                            <UserX className="h-3.5 w-3.5" />
+                      {/* Cluster & Kormater Badge */}
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <div className="space-y-1">
+                          {clustName ? (
+                            <div className="flex items-center gap-1 font-medium text-foreground">
+                              <GraduationCap className="h-3 w-3 text-primary shrink-0" />
+                              <span>{clustName}</span>
+                            </div>
                           ) : (
-                            <UserCheck className="h-3.5 w-3.5" />
+                            <span className="italic text-muted-foreground/60">-</span>
                           )}
-                        </Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {m.isKormater && (
+                            <Badge className="bg-amber-500/15 text-amber-700 dark:text-amber-400 border-amber-500/30 text-[9px] py-0 gap-0.5">
+                              <Sparkles className="h-2.5 w-2.5" />
+                              Kormater
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Subunit & Kormasit Badge */}
+                      <td className="px-4 py-3 text-muted-foreground">
+                        <div className="space-y-1">
+                          {subName ? (
+                            <div className="flex items-center gap-1 font-medium text-foreground">
+                              <MapPin className="h-3 w-3 text-emerald-500 shrink-0" />
+                              <span>{subName}</span>
+                            </div>
+                          ) : (
+                            <span className="italic text-muted-foreground/60">-</span>
+                          )}
+                          {m.isKormasit && (
+                            <Badge className="bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30 text-[9px] py-0 gap-0.5">
+                              <Sparkles className="h-2.5 w-2.5" />
+                              Kormasit
+                            </Badge>
+                          )}
+                        </div>
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-4 py-3">
+                        <Badge
+                          variant={m.status === 'active' ? 'default' : 'outline'}
+                          className={`text-[10px] font-semibold ${
+                            m.status === 'active'
+                              ? 'bg-emerald-500/15 text-emerald-700 dark:text-emerald-400 border-emerald-500/30'
+                              : 'text-muted-foreground border-border'
+                          }`}
+                        >
+                          {statusLabels[m.status]}
+                        </Badge>
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-4 py-3 text-right">
+                        <div className="flex items-center justify-end gap-1">
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                            title={dict.actions.edit}
+                            onClick={() => setSelectedMemberForEdit(m)}
+                          >
+                            <Edit2 className="h-3.5 w-3.5" />
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className="h-7 w-7 text-muted-foreground hover:text-foreground"
+                            title={dict.actions.resetPassword}
+                            onClick={() => setSelectedMemberForReset(m)}
+                          >
+                            <KeyRound className="h-3.5 w-3.5" />
+                          </Button>
+
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            className={`h-7 w-7 ${
+                              m.status === 'active'
+                                ? 'text-muted-foreground hover:text-destructive'
+                                : 'text-emerald-600 hover:text-emerald-700'
+                            }`}
+                            title={
+                              m.status === 'active'
+                                ? dict.actions.deactivate
+                                : dict.actions.activate
+                            }
+                            onClick={() => handleToggleStatus(m)}
+                          >
+                            {m.status === 'active' ? (
+                              <UserX className="h-3.5 w-3.5" />
+                            ) : (
+                              <UserCheck className="h-3.5 w-3.5" />
+                            )}
+                          </Button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
         </div>
       </div>
 
-      {/* Dialog Modals */}
+      {/* Dialogs */}
       <CreateMemberDialog
         isOpen={isCreateOpen}
         onClose={() => setIsCreateOpen(false)}

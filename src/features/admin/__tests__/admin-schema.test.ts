@@ -19,6 +19,28 @@ describe('Admin & Member Schemas', () => {
       expect(result.success).toBe(true);
     });
 
+    it('validates a valid member registration payload with cluster, subunit, and leadership flags', () => {
+      const valid = {
+        fullName: 'Budi Santoso',
+        email: 'budi@samudrakarsa.org',
+        password: 'PasswordKuat2026!',
+        roles: ['member'],
+        divisionId: 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
+        clusterId: 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22',
+        subunitId: 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33',
+        teamRole: 'Kormater Klaster Sains Terapan',
+        isKormater: true,
+        isKormasit: false,
+      };
+      const result = createMemberSchema.safeParse(valid);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.isKormater).toBe(true);
+        expect(result.data.isKormasit).toBe(false);
+        expect(result.data.clusterId).toBe('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22');
+      }
+    });
+
     it('rejects member with too short full name', () => {
       const invalid = {
         fullName: 'A',
@@ -73,6 +95,22 @@ describe('Admin & Member Schemas', () => {
       };
       const result = updateMemberSchema.safeParse(valid);
       expect(result.success).toBe(true);
+    });
+
+    it('validates updating cluster, subunit, and leadership flags', () => {
+      const valid = {
+        clusterId: 'b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22',
+        subunitId: 'c0eebc99-9c0b-4ef8-bb6d-6bb9bd380a33',
+        isKormater: true,
+        isKormasit: false,
+        teamRole: 'Kormater Klaster Maritim',
+      };
+      const result = updateMemberSchema.safeParse(valid);
+      expect(result.success).toBe(true);
+      if (result.success) {
+        expect(result.data.isKormater).toBe(true);
+        expect(result.data.clusterId).toBe('b0eebc99-9c0b-4ef8-bb6d-6bb9bd380a22');
+      }
     });
 
     it('validates deactivating a member', () => {

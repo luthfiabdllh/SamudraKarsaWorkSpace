@@ -42,4 +42,6 @@ export interface DivisionMemberItem {
   teamRole: string | null;
   status: string;
   photoUrl: string | null;
+  isKormasit?: boolean;
+  isKormater?: boolean;
 }
