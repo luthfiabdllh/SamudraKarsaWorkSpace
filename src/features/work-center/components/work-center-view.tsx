@@ -108,6 +108,7 @@ export function WorkCenterView({ currentUserId, currentUser }: WorkCenterViewPro
       <WorkItemDrawer
         selectedItem={selectedItem}
         currentUserId={effectiveUserId}
+        currentUser={currentUser}
         onClose={() => setSelectedItem(null)}
       />
 
@@ -115,6 +116,7 @@ export function WorkCenterView({ currentUserId, currentUser }: WorkCenterViewPro
       <CreateWorkItemDialog
         open={createDialogOpen}
         onOpenChange={setCreateDialogOpen}
+        currentUser={currentUser}
       />
     </div>
   );

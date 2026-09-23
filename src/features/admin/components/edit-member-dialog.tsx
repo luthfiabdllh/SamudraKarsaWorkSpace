@@ -15,7 +15,7 @@ import { id as dictionary } from '@/lib/dictionaries/id';
 import { useDivisions } from '@/features/requests/api/use-requests';
 import { useClustersList, useSubunitsList } from '@/features/divisions';
 import { useUpdateMember } from '../api/use-admin';
-import type { AdminMemberItem, MemberAccountStatus } from '../types';
+import type { AdminMemberItem } from '../types';
 
 interface EditMemberDialogProps {
   member: AdminMemberItem | null;

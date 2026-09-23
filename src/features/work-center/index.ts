@@ -14,3 +14,4 @@ export * from './components/work-item-drawer';
 export * from './components/fsm-transition-dialog';
 export * from './components/conflict-dialog';
 export * from './components/create-work-item-dialog';
+export * from './components/assign-pic-dialog';

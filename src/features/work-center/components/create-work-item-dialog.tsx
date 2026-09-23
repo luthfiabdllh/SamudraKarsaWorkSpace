@@ -22,6 +22,7 @@ import {
 } from '@/components/ui/select';
 import { useCreateWorkItem } from '../api/use-work-item-mutations';
 import { useWorkItems } from '../api/use-work-items';
+import { useDivisionMembers } from '@/features/divisions/api/use-divisions';
 import { getDictionary } from '@/lib/i18n';
 import { WORK_ITEM_PRIORITIES, WORK_ITEM_TYPES, type WorkItemPriority, type WorkItemType } from '../types';
 import { Loader2 } from 'lucide-react';
@@ -31,16 +32,28 @@ import { cn } from '@/lib/utils';
 interface CreateWorkItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  currentUser?: {
+    id: string;
+    roles?: readonly string[];
+    divisionCodes?: readonly string[];
+    divisionId?: string | null;
+  } | null;
 }
 
-export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialogProps) {
+export function CreateWorkItemDialog({
+  open,
+  onOpenChange,
+  currentUser,
+}: CreateWorkItemDialogProps) {
   const dict = getDictionary();
   const createMutation = useCreateWorkItem();
   const { data: rawStories = [] } = useWorkItems({ type: 'story' });
+  const { data: members = [] } = useDivisionMembers(currentUser?.divisionId || undefined);
 
   const [title, setTitle] = useState('');
   const [type, setType] = useState<WorkItemType>('task');
   const [priority, setPriority] = useState<WorkItemPriority>('medium');
+  const [primaryPicId, setPrimaryPicId] = useState('');
   const [parentId, setParentId] = useState('');
   const [storyPoints, setStoryPoints] = useState(0);
   const [startDate, setStartDate] = useState('');
@@ -62,6 +75,8 @@ export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialo
         title: title.trim(),
         type,
         priority,
+        divisionId: currentUser?.divisionId || null,
+        primaryPicId: primaryPicId || null,
         parentId: parentId || null,
         storyPoints: type === 'task' ? storyPoints : 0,
         startDate: startDate || null,
@@ -75,6 +90,7 @@ export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialo
       setTitle('');
       setType('task');
       setPriority('medium');
+      setPrimaryPicId('');
       setParentId('');
       setStoryPoints(0);
       setStartDate('');
@@ -201,6 +217,36 @@ export function CreateWorkItemDialog({ open, onOpenChange }: CreateWorkItemDialo
                   </button>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* PIC Selector (if division members available) */}
+          {members.length > 0 && (
+            <div className="space-y-1.5">
+              <Label htmlFor="create-pic">{dict.workCenter.create.picLabel}</Label>
+              <Select
+                value={primaryPicId || 'none'}
+                onValueChange={(val) => setPrimaryPicId(val === 'none' ? '' : val)}
+              >
+                <SelectTrigger id="create-pic">
+                  <SelectValue placeholder={dict.workCenter.drawer.selectPicPlaceholder} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">{dict.workCenter.drawer.noPic}</SelectItem>
+                  {members.map((member) => (
+                    <SelectItem key={member.id} value={member.id}>
+                      <span className="font-medium text-foreground">
+                        {member.fullName || member.nickname}
+                      </span>
+                      {member.teamRole && (
+                        <span className="text-muted-foreground ml-1.5 text-xs">
+                          ({member.teamRole})
+                        </span>
+                      )}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           )}
 

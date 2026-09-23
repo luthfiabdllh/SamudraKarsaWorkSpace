@@ -20,10 +20,12 @@ import {
 } from '../api/use-work-item-mutations';
 import { FsmTransitionDialog } from './fsm-transition-dialog';
 import { ConflictDialog } from './conflict-dialog';
+import { AssignPicDialog } from './assign-pic-dialog';
 import { getDictionary } from '@/lib/i18n';
 import type { WorkItem, WorkItemStatus } from '../types';
 import {
   UserCheck,
+  UserPlus,
   Calendar,
   Layers,
   ArrowRight,
@@ -38,12 +40,19 @@ import type { AxiosError } from 'axios';
 interface WorkItemDrawerProps {
   selectedItem: WorkItem | null;
   currentUserId?: string;
+  currentUser?: {
+    id: string;
+    roles?: readonly string[];
+    divisionCodes?: readonly string[];
+    divisionId?: string | null;
+  } | null;
   onClose: () => void;
 }
 
 export function WorkItemDrawer({
   selectedItem,
   currentUserId,
+  currentUser,
   onClose,
 }: WorkItemDrawerProps) {
   const dict = getDictionary();
@@ -58,8 +67,21 @@ export function WorkItemDrawer({
   const [activeTargetStatus, setActiveTargetStatus] = useState<WorkItemStatus | null>(null);
   const [showFsmDialog, setShowFsmDialog] = useState(false);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
+  const [showAssignPicDialog, setShowAssignPicDialog] = useState(false);
 
   if (!selectedItem) return null;
+
+  // Cek wewenang menetapkan PIC: Owner/Co-owner atau Kadiv/Wakdiv pada divisi tiket ini
+  const isOwner =
+    currentUser?.roles?.includes('owner') || currentUser?.roles?.includes('co_owner');
+  const isDivLead =
+    currentUser?.roles?.includes('division_head') ||
+    currentUser?.roles?.includes('division_deputy');
+  const targetDivisionId = detail?.divisionId ?? selectedItem.divisionId;
+  const isMyDivision =
+    !targetDivisionId ||
+    Boolean(currentUser?.divisionId && currentUser.divisionId === targetDivisionId);
+  const canAssignPic = Boolean(isOwner || (isDivLead && isMyDivision));
 
   // Gunakan data detail jika sudah termuat, atau fallback ke selectedItem ringkas
   const currentStatus = detail?.status ?? selectedItem.status;
@@ -200,19 +222,32 @@ export function WorkItemDrawer({
                     Pekerjaan ini belum memiliki Penanggung Jawab (PIC).
                   </span>
                 </div>
-                <Button
-                  size="sm"
-                  onClick={handleQuickClaimPic}
-                  disabled={setPicMutation.isPending}
-                  className="gap-2 shrink-0 bg-amber-600 hover:bg-amber-700 text-white"
-                >
-                  {setPicMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <UserCheck className="h-4 w-4" />
+                <div className="flex items-center gap-2 shrink-0">
+                  {canAssignPic && (
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => setShowAssignPicDialog(true)}
+                      className="gap-1.5 text-xs border-amber-500/40 text-amber-800 dark:text-amber-300 hover:bg-amber-500/15"
+                    >
+                      <UserPlus className="h-3.5 w-3.5" />
+                      <span>{dict.workCenter.drawer.assignPic}</span>
+                    </Button>
                   )}
-                  <span>{dict.workCenter.quickClaim}</span>
-                </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleQuickClaimPic}
+                    disabled={setPicMutation.isPending}
+                    className="gap-1.5 text-xs bg-amber-600 hover:bg-amber-700 text-white"
+                  >
+                    {setPicMutation.isPending ? (
+                      <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    ) : (
+                      <UserCheck className="h-3.5 w-3.5" />
+                    )}
+                    <span>{dict.workCenter.quickClaim}</span>
+                  </Button>
+                </div>
               </div>
             )}
 
@@ -273,9 +308,27 @@ export function WorkItemDrawer({
               </h4>
               <div className="grid grid-cols-2 gap-4 rounded-xl border border-border/70 p-4 bg-muted/20 text-xs">
                 <div>
-                  <span className="text-muted-foreground block mb-1">
-                    {dict.workCenter.drawer.pic}
-                  </span>
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-muted-foreground block">
+                      {dict.workCenter.drawer.pic}
+                    </span>
+                    {canAssignPic && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAssignPicDialog(true)}
+                        className="h-5 px-1.5 text-[11px] font-semibold text-primary hover:text-primary hover:bg-primary/10 gap-1 -my-1"
+                      >
+                        <UserPlus className="h-3 w-3" />
+                        <span>
+                          {selectedItem.primaryPicId
+                            ? dict.workCenter.drawer.changePic
+                            : dict.workCenter.drawer.assignPic}
+                        </span>
+                      </Button>
+                    )}
+                  </div>
                   <span className="font-semibold text-foreground flex items-center gap-1.5">
                     {selectedItem.primaryPicName ? (
                       <>
@@ -414,6 +467,19 @@ export function WorkItemDrawer({
           void refetch();
         }}
       />
+
+      {/* Assign PIC Dialog for Kadiv / Wakadiv / Owner */}
+      {showAssignPicDialog && (
+        <AssignPicDialog
+          key={`${selectedItem.id}-${selectedItem.primaryPicId ?? 'none'}`}
+          open={showAssignPicDialog}
+          onOpenChange={setShowAssignPicDialog}
+          workItem={selectedItem}
+          currentVersion={currentVersion}
+          divisionId={targetDivisionId}
+          onConflict={() => setShowConflictDialog(true)}
+        />
+      )}
     </>
   );
 }
