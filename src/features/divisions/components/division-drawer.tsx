@@ -60,7 +60,7 @@ export function DivisionDrawer({
             </div>
           </div>
           <SheetDescription className="text-xs sm:text-sm leading-relaxed text-muted-foreground">
-            {division.description || 'Divisi operasional kepanitiaan resmi Samudra Karsa.'}
+            {division.description || 'Divisi operasional kepanitiaan resmi Moa Bercerita.'}
           </SheetDescription>
         </SheetHeader>
 

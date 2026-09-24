@@ -20,7 +20,7 @@ interface LoginFormProps {
 }
 
 /**
- * Komponen Form Masuk Samudra Karsa.
+ * Komponen Form Masuk Moa Bercerita.
  * Menggunakan React Hook Form + Zod v4 + TanStack Query Mutation.
  * Sesuai PRD-FRONTEND: Keamanan token di BFF, tidak ada token tersimpan di memori browser.
  */

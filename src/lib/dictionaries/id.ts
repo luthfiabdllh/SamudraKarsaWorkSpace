@@ -1,12 +1,12 @@
 /**
- * Kamus Resmi Bahasa Indonesia Samudra Karsa WorkSpace.
+ * Kamus Resmi Bahasa Indonesia Moa Bercerita WorkSpace.
  * Sesuai Keputusan 15 & 32: Bahasa Indonesia 100% di lapisan tampilan antarmuka (UI).
  * Tidak ada string hardcoded di komponen JSX.
  */
 
 export const id = {
   common: {
-    appName: 'Samudra Karsa',
+    appName: 'Moa Bercerita',
     tagline: 'Platform Manajemen Kolaborasi & Operasional Organisasi',
     loading: 'Memuat...',
     processing: 'Sedang memproses...',
@@ -741,7 +741,7 @@ export const id = {
       institutionLabel: 'Nama Instansi / Lembaga',
       institutionPlaceholder: 'Contoh: Pemerintah Provinsi...',
       signerLabel: 'Nama Pejabat Penandatangan',
-      signerPlaceholder: 'Contoh: Ketua Umum Samudra Karsa...',
+      signerPlaceholder: 'Contoh: Ketua Umum Moa Bercerita...',
       letterDateLabel: 'Tanggal Surat',
       dueDateLabel: 'Tenggat Waktu Disposisi',
       noteLabel: 'Ringkasan Isi / Catatan Khusus',

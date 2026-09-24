@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import {
   LayoutDashboard,
@@ -15,7 +16,6 @@ import {
   Package,
   Calendar,
   ShieldCheck,
-  Anchor,
   Clock,
   X,
 } from 'lucide-react';
@@ -90,13 +90,20 @@ export function DashboardSidebar({ dict, userRoles = [] }: DashboardSidebarProps
       >
         {/* Brand Header */}
         <div className="flex h-16 items-center border-b border-border/70 px-4 gap-3">
-          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-primary-foreground font-bold text-base shadow-md shadow-primary/20 shrink-0">
-            <Anchor className="h-5 w-5" aria-hidden="true" />
+          <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-card border border-border/60 shadow-xs shrink-0 overflow-hidden p-1">
+            <Image
+              src="/logo.svg"
+              alt="Logo Moa Bercerita"
+              width={32}
+              height={32}
+              className="h-full w-full object-contain"
+              priority
+            />
           </div>
           {isSidebarOpen && (
             <div className="flex flex-col min-w-0">
               <span className="font-bold text-sm tracking-tight truncate text-foreground">
-                Samudra Karsa
+                Moa Bercerita
               </span>
               <span className="text-[11px] text-muted-foreground truncate">
                 WorkSpace v2.0

@@ -9,7 +9,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Anchor } from 'lucide-react';
+import Image from 'next/image';
 
 export async function generateMetadata(): Promise<Metadata> {
   const dict = await getDictionary();
@@ -37,8 +37,15 @@ export default async function LoginPage() {
       <div className="w-full max-w-md space-y-6 relative z-10">
         {/* Logo & Brand Header */}
         <div className="text-center space-y-2">
-          <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary text-primary-foreground shadow-lg shadow-primary/20 ring-4 ring-primary/10">
-            <Anchor className="h-7 w-7" aria-hidden="true" />
+          <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-2xl bg-card border border-border/80 shadow-lg shadow-primary/5 ring-4 ring-primary/5 p-2">
+            <Image
+              src="/logo.svg"
+              alt="Logo Moa Bercerita"
+              width={48}
+              height={48}
+              className="h-full w-full object-contain"
+              priority
+            />
           </div>
           <h1 className="text-2xl font-bold tracking-tight text-foreground sm:text-3xl">
             {dict.common.appName}

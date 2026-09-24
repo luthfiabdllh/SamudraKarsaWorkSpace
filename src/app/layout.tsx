@@ -17,11 +17,11 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: {
-    default: 'Samudra Karsa',
-    template: '%s | Samudra Karsa',
+    default: 'Moa Bercerita',
+    template: '%s | Moa Bercerita',
   },
   description:
-    'Platform Manajemen Operasional & Kolaborasi Terpadu Organisasi Samudra Karsa.',
+    'Platform Manajemen Operasional & Kolaborasi Terpadu Organisasi Moa Bercerita.',
   metadataBase: new URL(
     process.env.NEXT_PUBLIC_APP_URL ?? 'http://localhost:3001'
   ),

@@ -12,7 +12,7 @@ test.describe('Authentication & Access Control', () => {
       await expect(page.locator('#login-email')).toBeVisible();
       await expect(page.locator('#login-password')).toBeVisible();
       await expect(page.locator('#login-submit')).toBeVisible();
-      await expect(page.getByRole('heading', { level: 1 })).toContainText('Samudra Karsa');
+      await expect(page.getByRole('heading', { level: 1 })).toContainText('Moa Bercerita');
     });
 
     test('menampilkan pesan validasi ketika formulir dikirim kosong', async ({ page }) => {
