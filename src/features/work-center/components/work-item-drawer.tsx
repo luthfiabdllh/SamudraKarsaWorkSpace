@@ -21,6 +21,7 @@ import {
 import { FsmTransitionDialog } from './fsm-transition-dialog';
 import { ConflictDialog } from './conflict-dialog';
 import { AssignPicDialog } from './assign-pic-dialog';
+import { EditWorkItemDialog } from './edit-work-item-dialog';
 import { getDictionary } from '@/lib/i18n';
 import type { WorkItem, WorkItemStatus } from '../types';
 import {
@@ -33,6 +34,7 @@ import {
   AlertCircle,
   Loader2,
   CheckCircle2,
+  Pencil,
 } from 'lucide-react';
 import { toast } from 'sonner';
 import type { AxiosError } from 'axios';
@@ -68,10 +70,11 @@ export function WorkItemDrawer({
   const [showFsmDialog, setShowFsmDialog] = useState(false);
   const [showConflictDialog, setShowConflictDialog] = useState(false);
   const [showAssignPicDialog, setShowAssignPicDialog] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
 
   if (!selectedItem) return null;
 
-  // Cek wewenang menetapkan PIC: Owner/Co-owner atau Kadiv/Wakdiv pada divisi tiket ini
+  // Cek wewenang: Owner/Co-owner, Kadiv/Wakdiv pada divisi tiket ini, atau pembuat/PIC/assignee
   const isOwner =
     currentUser?.roles?.includes('owner') || currentUser?.roles?.includes('co_owner');
   const isDivLead =
@@ -81,7 +84,22 @@ export function WorkItemDrawer({
   const isMyDivision =
     !targetDivisionId ||
     Boolean(currentUser?.divisionId && currentUser.divisionId === targetDivisionId);
-  const canAssignPic = Boolean(isOwner || (isDivLead && isMyDivision));
+  const isCreatorOrPicOrAssignee = Boolean(
+    currentUser?.id &&
+      ((detail?.createdBy && detail.createdBy === currentUser.id) ||
+        selectedItem.primaryPicId === currentUser.id ||
+        detail?.assignees?.some((a) => a.id === currentUser.id))
+  );
+
+  // Task dapat diedit dan diatur PIC-nya oleh seluruh anggota
+  const canEdit =
+    selectedItem.type === 'task' ||
+    Boolean(isOwner || (isDivLead && isMyDivision) || isCreatorOrPicOrAssignee);
+  const canAssignPic = Boolean(
+    selectedItem.type === 'task' ||
+    isOwner ||
+    (isDivLead && isMyDivision)
+  );
 
   // Gunakan data detail jika sudah termuat, atau fallback ke selectedItem ringkas
   const currentStatus = detail?.status ?? selectedItem.status;
@@ -193,12 +211,31 @@ export function WorkItemDrawer({
               <span className="font-mono text-xs font-bold text-primary px-2.5 py-0.5 rounded-md bg-primary/10">
                 {selectedItem.workNumber}
               </span>
-              <Badge variant="outline" className="text-xs capitalize font-semibold">
-                {dict.priorities[selectedItem.priority] ?? selectedItem.priority}
-              </Badge>
+              <div className="flex items-center gap-2">
+                <Badge variant="outline" className="text-xs capitalize font-semibold">
+                  {dict.priorities[detail?.priority ?? selectedItem.priority] ??
+                    (detail?.priority ?? selectedItem.priority)}
+                </Badge>
+                {canEdit && (
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setShowEditDialog(true)}
+                    className="h-7 px-2 text-xs font-medium gap-1 text-foreground hover:text-primary hover:border-primary/50"
+                  >
+                    <Pencil className="h-3.5 w-3.5" />
+                    <span>
+                      {selectedItem.type === 'task'
+                        ? dict.workCenter.drawer.editTask
+                        : dict.workCenter.drawer.editWorkItem}
+                    </span>
+                  </Button>
+                )}
+              </div>
             </div>
             <SheetTitle className="text-xl font-bold leading-snug text-foreground">
-              {selectedItem.title}
+              {detail?.title ?? selectedItem.title}
             </SheetTitle>
             <SheetDescription className="text-xs text-muted-foreground flex items-center gap-2 mt-1">
               <span>{dict.types.workItems[selectedItem.type] ?? selectedItem.type}</span>
@@ -384,6 +421,16 @@ export function WorkItemDrawer({
                   </span>
                 </div>
 
+                {/* Progress */}
+                <div>
+                  <span className="text-muted-foreground block mb-1">
+                    {dict.workCenter.drawer.progress}
+                  </span>
+                  <span className="font-semibold text-foreground flex items-center gap-1.5">
+                    <span>{detail?.progressPercentage ?? selectedItem.progressPercentage ?? 0}%</span>
+                  </span>
+                </div>
+
                 {/* Parent Story if present */}
                 {(detail?.parentTitle || selectedItem.parentTitle) && (
                   <div>
@@ -468,7 +515,7 @@ export function WorkItemDrawer({
         }}
       />
 
-      {/* Assign PIC Dialog for Kadiv / Wakadiv / Owner */}
+      {/* Assign PIC Dialog for Kadiv / Wakadiv / Owner / Member on Task */}
       {showAssignPicDialog && (
         <AssignPicDialog
           key={`${selectedItem.id}-${selectedItem.primaryPicId ?? 'none'}`}
@@ -477,6 +524,19 @@ export function WorkItemDrawer({
           workItem={selectedItem}
           currentVersion={currentVersion}
           divisionId={targetDivisionId}
+          onConflict={() => setShowConflictDialog(true)}
+        />
+      )}
+
+      {/* Edit Work Item Dialog */}
+      {showEditDialog && (
+        <EditWorkItemDialog
+          key={`edit-${selectedItem.id}-${currentVersion}`}
+          open={showEditDialog}
+          onOpenChange={setShowEditDialog}
+          workItem={selectedItem}
+          currentVersion={currentVersion}
+          initialDetail={detail}
           onConflict={() => setShowConflictDialog(true)}
         />
       )}

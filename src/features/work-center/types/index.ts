@@ -89,6 +89,7 @@ export interface WorkItemStatusHistory {
 }
 
 export interface WorkItemDetail extends WorkItem {
+  createdBy?: string | null;
   description: string | null;
   clusterId?: string | null;
   subunitId?: string | null;

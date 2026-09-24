@@ -87,3 +87,26 @@ export const setWorkItemPicSchema = z.object({
 
 export type SetWorkItemPicValues = z.infer<typeof setWorkItemPicSchema>;
 
+/**
+ * Skema pembaruan / penyuntingan pekerjaan
+ */
+export const updateWorkItemSchema = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(3, 'Judul pekerjaan minimal 3 karakter.')
+    .max(200, 'Judul pekerjaan maksimal 200 karakter.')
+    .optional(),
+  type: z.enum(WORK_ITEM_TYPES).optional(),
+  description: z.string().trim().max(5000, 'Deskripsi maksimal 5000 karakter.').nullish(),
+  priority: z.enum(WORK_ITEM_PRIORITIES).optional(),
+  primaryPicId: z.string().uuid('PIC tidak valid.').nullish(),
+  parentId: z.string().uuid('Parent story tidak valid.').nullish().or(z.literal('')),
+  storyPoints: z.coerce.number().int().min(0, 'Story points tidak boleh negatif.').max(100).optional(),
+  startDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD').nullish().or(z.literal('')),
+  dueDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format tanggal harus YYYY-MM-DD').nullish().or(z.literal('')),
+  progressPercentage: z.coerce.number().int().min(0).max(100).optional(),
+});
+
+export type UpdateWorkItemValues = z.infer<typeof updateWorkItemSchema>;
+

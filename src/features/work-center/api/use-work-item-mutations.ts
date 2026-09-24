@@ -6,6 +6,7 @@ import type {
   CreateWorkItemFormValues,
   SetWorkItemPicValues,
   TransitionWorkItemValues,
+  UpdateWorkItemValues,
 } from '../schemas/work-item';
 
 /**
@@ -140,6 +141,41 @@ export function useSetWorkItemPic() {
     }) => {
       const response = await apiClient.patch<WorkItemDetail>(
         `/work-items/${id}/pic`,
+        data,
+        {
+          headers: {
+            'If-Match': `"${version}"`,
+          },
+        }
+      );
+      return response.data;
+    },
+    onSuccess: (_, variables) => {
+      void queryClient.invalidateQueries({ queryKey: workCenterKeys.detail(variables.id) });
+      void queryClient.invalidateQueries({ queryKey: workCenterKeys.lists() });
+    },
+  });
+}
+
+/**
+ * Mutasi pembaruan rincian pekerjaan (PATCH /work-items/:id).
+ * Wajib menyertakan header If-Match untuk optimistic locking.
+ */
+export function useUpdateWorkItem() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      version,
+      data,
+    }: {
+      id: string;
+      version: number;
+      data: UpdateWorkItemValues;
+    }) => {
+      const response = await apiClient.patch<WorkItemDetail>(
+        `/work-items/${id}`,
         data,
         {
           headers: {

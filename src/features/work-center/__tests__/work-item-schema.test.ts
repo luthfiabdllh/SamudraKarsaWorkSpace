@@ -3,6 +3,7 @@ import {
   createWorkItemFormSchema,
   transitionWorkItemSchema,
   setWorkItemPicSchema,
+  updateWorkItemSchema,
 } from '../schemas/work-item';
 import { workCenterKeys } from '../api/query-keys';
 
@@ -115,6 +116,44 @@ describe('Work Center Schemas & Query Keys', () => {
       };
 
       const result = setWorkItemPicSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+    });
+  });
+
+  describe('updateWorkItemSchema', () => {
+    it('should validate valid partial update data', () => {
+      const valid = {
+        title: 'Judul tugas yang diperbarui',
+        priority: 'high',
+        storyPoints: 5,
+        progressPercentage: 45,
+        startDate: '2026-08-01',
+        dueDate: '2026-08-10',
+        description: 'Rincian tugas telah disesuaikan dengan instruksi terkini.',
+      };
+
+      const result = updateWorkItemSchema.safeParse(valid);
+      expect(result.success).toBe(true);
+    });
+
+    it('should reject title shorter than 3 characters on update', () => {
+      const invalid = {
+        title: 'AB',
+      };
+
+      const result = updateWorkItemSchema.safeParse(invalid);
+      expect(result.success).toBe(false);
+      if (!result.success) {
+        expect(result.error.issues[0]?.message).toContain('minimal 3 karakter');
+      }
+    });
+
+    it('should reject invalid due date format on update', () => {
+      const invalid = {
+        dueDate: '10/08/2026',
+      };
+
+      const result = updateWorkItemSchema.safeParse(invalid);
       expect(result.success).toBe(false);
     });
   });

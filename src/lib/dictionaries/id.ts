@@ -416,6 +416,13 @@ export const id = {
       assignNotePlaceholder: 'Catatan tambahan atau arahan tugas...',
       assignButton: 'Simpan Penugasan',
       assigningButton: 'Menugaskan...',
+      editTask: 'Edit Tugas',
+      editWorkItem: 'Edit Pekerjaan',
+      editDialogTitle: 'Edit Informasi Pekerjaan',
+      editDialogDesc: 'Perbarui rincian, tenggat waktu, atau progres capaian tugas ini.',
+      editSuccess: 'Informasi pekerjaan berhasil diperbarui.',
+      editError: 'Gagal memperbarui informasi pekerjaan.',
+      progressPercentageLabel: 'Kemajuan / Progres Pengerjaan (%)',
     },
     conflict: {
       title: 'Konflik Pembaruan Data (409 Conflict)',
