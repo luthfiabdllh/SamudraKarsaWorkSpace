@@ -125,6 +125,7 @@ export interface WorkCenterFilterParams {
   parentId?: string;
   sourceRequestId?: string;
   withoutPic?: boolean;
+  picId?: string;
   q?: string;
   limit?: number;
   offset?: number;

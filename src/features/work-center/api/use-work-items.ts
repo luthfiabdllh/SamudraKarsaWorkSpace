@@ -17,6 +17,7 @@ export function useWorkItems(filters?: WorkCenterFilterParams) {
       if (filters?.status) params.status = filters.status;
       if (filters?.type) params.type = filters.type;
       if (filters?.withoutPic) params.withoutPic = true;
+      if (filters?.picId) params.picId = filters.picId;
       if (filters?.q) params.q = filters.q;
       if (filters?.limit) params.limit = filters.limit;
       if (filters?.offset) params.offset = filters.offset;
